@@ -1,4 +1,4 @@
-// use server'
+'use server';
 
 /**
  * @fileOverview This file defines a Genkit flow for formatting text based on user-selected styles.
@@ -31,6 +31,7 @@ const formatTextPrompt = ai.definePrompt({
   input: {schema: FormatTextInputSchema},
   output: {schema: FormatTextOutputSchema},
   prompt: `You are a text formatting expert. Please rewrite the following text in the style of a {{{style}}}.\n\nText: {{{text}}}`,
+  model: 'googleai/gemini-2.0-flash',
 });
 
 const formatTextFlow = ai.defineFlow(
