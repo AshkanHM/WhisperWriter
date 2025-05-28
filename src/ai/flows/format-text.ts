@@ -15,7 +15,7 @@ import {z} from 'genkit';
 
 const FormatTextInputSchema = z.object({
   text: z.string().describe('The text to be formatted.'),
-  style: z.string().describe('The desired formatting style (e.g., friendly WhatsApp chat, professional email).'),
+  style: z.string().describe('The desired formatting style (e.g., Clean Up Text, Friendly WhatsApp chat, Professional Email).'),
   language: z.string().optional().describe('The language of the input text (e.g., en-US, fa-IR). The output should be in this language.'),
 });
 export type FormatTextInput = z.infer<typeof FormatTextInputSchema>;
@@ -33,20 +33,52 @@ const formatTextPrompt = ai.definePrompt({
   name: 'formatTextPrompt',
   input: {schema: FormatTextInputSchema},
   output: {schema: FormatTextOutputSchema},
-  prompt: `You are a text formatting expert. Please rewrite the following text in the style of a {{{style}}}.
+  prompt: `You are a text formatting expert. Your primary goal is to rewrite the provided text according to the specified 'Requested Style', ensuring the output strictly remains in the 'Original Language'.
+
+Input Text: {{{text}}}
+Requested Style: {{{style}}}
 {{#if language}}
-IMPORTANT: The output text MUST be in the same language as the input, which is {{{language}}}. Do not translate the text.
+Original Language: {{{language}}}
+Instruction: The output text MUST be in this language ({{{language}}}). Do not translate.
 {{else}}
-IMPORTANT: The output text MUST be in the same language as the input. Do not translate the text.
+Instruction: The output text MUST be in the same language as the input. Do not translate the text.
 {{/if}}
 
-IMPORTANT:
-- If the style is 'Friendly WhatsApp chat', ensure the output is casual and conversational AND STRICTLY DOES NOT INCLUDE ANY EMOJIS.
-- If the style is 'Semi-formal Work Chat (Google Chat/ClickUp)', make it appropriate for professional but slightly informal communication with colleagues and managers, suitable for platforms like Google Chat or ClickUp. It should be clear, concise, and maintain a respectful tone.
+Please apply the specific guidelines for the 'Requested Style':
 
-For all other styles, adhere to their typical conventions while maintaining the original language.
+If 'Requested Style' is 'Clean Up Text':
+- Focus on correcting grammar, spelling, and punctuation.
+- Ensure proper text formatting and sentence structure according to the conventions of the 'Original Language'.
+- Do not significantly alter the tone or core message of the original text. The goal is a polished, grammatically correct, and well-formatted version of the input.
 
-Text: {{{text}}}`,
+If 'Requested Style' is 'Friendly WhatsApp chat':
+- Make the output very casual, natural, and friendly, as if talking to a close friend.
+- Ensure the tone is conversational, engaging, and light-hearted.
+- STRICTLY DO NOT INCLUDE ANY EMOJIS.
+
+If 'Requested Style' is 'Semi-formal Work Chat (Google Chat/ClickUp)':
+- Make the output appropriate for professional communication with colleagues and managers, suitable for platforms like Google Chat or ClickUp.
+- The text should be clear, concise, well-instructed, and professionally formatted (e.g., using bullet points or numbered lists if appropriate for clarity).
+- Maintain a respectful yet approachable tone. Ensure it sounds professional and polished.
+
+If 'Requested Style' is 'Professional Email':
+- Format the text as a professional email. Maintain a formal and courteous tone. Ensure appropriate email structure if applicable (e.g., salutation, body, closing), but primarily focus on rephrasing the given text into this style.
+
+If 'Requested Style' is 'Concise Summary':
+- Rewrite the text as a brief and concise summary, capturing the main points effectively.
+
+If 'Requested Style' is 'Formal Report Snippet':
+- Adapt the text into a snippet suitable for a formal report. Use objective language and a structured, professional tone.
+
+If 'Requested Style' is 'Creative Story Idea':
+- Transform the text into a compelling and imaginative story idea or a snippet of a creative story.
+
+If 'Requested Style' is 'To-do List':
+- Convert the text into a clear and actionable to-do list format. Each item should represent a distinct task.
+
+For any other 'Requested Style' not explicitly detailed above, please interpret '{{{style}}}' broadly and rewrite the text to fit its typical conventions, always maintaining the 'Original Language'.
+
+Rewrite the text now.`,
   model: 'googleai/gemini-2.0-flash',
 });
 
