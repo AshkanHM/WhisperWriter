@@ -169,6 +169,7 @@ const WhisperWriterPage: NextPage = () => {
       const formatResult = await formatText({
         text: rawTranscription,
         style: selectedStyle,
+        language: selectedLanguage, // Pass the selected language
       });
       setOutputText(formatResult.formattedText);
       setStatusMessage('Text formatting complete.');
@@ -325,4 +326,3 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
-
