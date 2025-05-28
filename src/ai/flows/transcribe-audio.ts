@@ -1,3 +1,4 @@
+
 // 'use server';
 /**
  * @fileOverview Real-time audio transcription using the OpenAI Whisper API.
@@ -18,7 +19,7 @@ const TranscribeAudioInputSchema = z.object({
     .describe(
       "Audio data as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
-  language: z.string().optional().describe('The language of the audio, if known.'),
+  language: z.string().optional().describe('The language of the audio, if known. (e.g., en-US, fa-IR)'),
 });
 export type TranscribeAudioInput = z.infer<typeof TranscribeAudioInputSchema>;
 
@@ -35,11 +36,14 @@ const transcribeAudioPrompt = ai.definePrompt({
   name: 'transcribeAudioPrompt',
   input: {schema: TranscribeAudioInputSchema},
   output: {schema: TranscribeAudioOutputSchema},
-  prompt: `Transcribe the following audio to text.  
+  prompt: `Transcribe the following audio to text.
+{{#if language}}
+The primary language of the audio is {{{language}}}. Please prioritize transcription in this language.
+{{/if}}
 
 Audio: {{media url=audioDataUri}}
 
-Transcription:`, // Removed language parameter
+Transcription:`,
   model: 'googleai/gemini-2.0-flash'
 });
 
@@ -54,3 +58,4 @@ const transcribeAudioFlow = ai.defineFlow(
     return output!;
   }
 );
+
