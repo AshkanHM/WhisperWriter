@@ -207,57 +207,59 @@ const WhisperWriterPage: NextPage = () => {
       <Head>
         <title>WhisperWriter - Real-time Transcription & Formatting</title>
       </Head>
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
-        <Card className="w-full max-w-2xl shadow-2xl">
-          <CardHeader className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-2">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary">
-                    <path d="M12 2C11.073 2 10.243 2.675 10.046 3.556C8.492 3.913 7.218 5.151 6.833 6.722C5.898 6.943 5.117 7.686 4.843 8.601C3.961 8.805 3.25 9.524 3.014 10.406C2.188 10.575 1.5 11.226 1.5 12C1.5 12.774 2.188 13.425 3.014 13.594C3.25 14.476 3.961 15.195 4.843 15.399C5.117 16.314 5.898 17.057 6.833 17.278C7.218 18.849 8.492 20.087 10.046 20.444C10.243 21.325 11.073 22 12 22C12.927 22 13.757 21.325 13.954 20.444C15.508 20.087 16.782 18.849 17.167 17.278C18.102 17.057 18.883 16.314 19.157 15.399C20.039 15.195 20.75 14.476 20.986 13.594C21.812 13.425 22.5 12.774 22.5 12C22.5 11.226 21.812 10.575 20.986 10.406C20.75 9.524 20.039 8.805 19.157 8.601C18.883 7.686 18.102 6.943 17.167 6.722C16.782 5.151 15.508 3.913 13.954 3.556C13.757 2.675 12.927 2 12 2ZM12 4C12.5523 4 13 4.44772 13 5C13 5.55228 12.5523 6 12 6C11.4477 6 11 5.55228 11 5C11 4.44772 11.4477 4 12 4ZM9 7C9.55228 7 10 7.44772 10 8C10 8.55228 9.55228 9 9 9C8.44772 9 8 8.55228 8 8C8 7.44772 8.44772 7 9 7ZM15 7C15.5523 7 16 7.44772 16 8C16 8.55228 15.5523 9 15 9C14.4477 9 14 8.55228 14 8C14 7.44772 14.4477 7 15 7ZM6.5 11C7.05228 11 7.5 11.4477 7.5 12C7.5 12.5523 7.05228 13 6.5 13C5.94772 13 5.5 12.5523 5.5 12C5.5 11.4477 5.94772 11 6.5 11ZM17.5 11C18.0523 11 18.5 11.4477 18.5 12C18.5 12.5523 18.0523 13 17.5 13C16.9477 13 16.5 12.5523 16.5 12C16.5 11.4477 16.9477 11 17.5 11ZM9 15C9.55228 15 10 15.4477 10 16C10 16.5523 9.55228 17 9 17C8.44772 17 8 16.5523 8 16C8 15.4477 8.44772 15 9 15ZM15 15C15.5523 15 16 15.4477 16 16C16 16.5523 15.5523 17 15 17C14.4477 17 14 16.5523 14 16C14 15.4477 14.4477 15 15 15ZM12 18C12.5523 18 13 18.4477 13 19C13 19.5523 12.5523 20 12 20C11.4477 20 11 19.5523 11 19C11 18.4477 11.4477 18 12 18Z" fill="currentColor"/>
+      <div className="min-h-screen flex flex-col items-center justify-center p-1 sm:p-2 bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
+        <Card className="w-full max-w-lg shadow-2xl"> {/* Reduced max-w-xl to max-w-lg */}
+          <CardHeader className="text-center pb-3 pt-4"> {/* Reduced padding */}
+            <div className="flex items-center justify-center space-x-1.5 mb-1.5"> {/* Reduced space and margin */}
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary"> {/* Reduced icon size */}
+                  <path d="M3 12C4.66667 7.33333 7.66667 6.33333 9 12C10 16 10.3333 16.6667 12 6C13.6667 16.6667 14 16 15 12C16.3333 7.33333 19.3333 8.33333 21 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <CardTitle className="text-3xl font-bold">WhisperWriter</CardTitle>
+                <CardTitle className="text-xl font-bold">WhisperWriter</CardTitle> {/* Reduced text size */}
             </div>
-            <CardDescription>Real-time AI-powered transcription and text formatting. Press {HOTKEY} to start/stop recording.</CardDescription>
+            <CardDescription className="text-xs"> {/* Reduced text size */}
+              AI-powered transcription & formatting. Press {HOTKEY} to start/stop.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <CardContent className="space-y-3 p-4"> {/* Reduced padding and space */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end"> {/* Reduced gap */}
               <div className="md:col-span-1">
-                <Label htmlFor="language-select" className="flex items-center mb-1">
-                  <Languages className="mr-2 h-4 w-4" /> Language
+                <Label htmlFor="language-select" className="flex items-center mb-0.5 text-xs"> {/* Reduced margin and text size */}
+                  <Languages className="mr-1.5 h-3.5 w-3.5" /> Language {/* Reduced icon size and margin */}
                 </Label>
                 <Select value={selectedLanguage} onValueChange={setSelectedLanguage} disabled={isRecordingActive || isLoading}>
-                  <SelectTrigger id="language-select">
+                  <SelectTrigger id="language-select" className="h-9 text-xs"> {/* Reduced height and text size */}
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
                   <SelectContent>
                     {LANGUAGES.map((lang) => (
-                      <SelectItem key={lang.value} value={lang.value}>
+                      <SelectItem key={lang.value} value={lang.value} className="text-xs"> {/* Reduced text size */}
                         {lang.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="md:col-span-2 flex space-x-2">
+              <div className="md:col-span-2 flex space-x-1.5"> {/* Reduced space */}
                 {recordingState === 'idle' || recordingState === 'stopped' ? (
-                  <Button onClick={handleStartRecording} className="w-full" disabled={isLoading}>
-                    <Mic className="mr-2 h-5 w-5" /> Record
+                  <Button onClick={handleStartRecording} className="w-full h-9 text-xs" disabled={isLoading}> {/* Reduced height and text size */}
+                    <Mic className="mr-1.5 h-3.5 w-3.5" /> Record {/* Reduced icon size and margin */}
                   </Button>
                 ) : recordingState === 'recording' ? (
                   <>
-                    <Button onClick={handlePauseRecording} variant="outline" className="w-full" disabled={isLoading}>
-                      <Pause className="mr-2 h-5 w-5" /> Pause
+                    <Button onClick={handlePauseRecording} variant="outline" className="w-full h-9 text-xs" disabled={isLoading}> {/* Reduced height and text size */}
+                      <Pause className="mr-1.5 h-3.5 w-3.5" /> Pause {/* Reduced icon size and margin */}
                     </Button>
-                    <Button onClick={handleStopRecording} variant="destructive" className="w-full" disabled={isLoading}>
-                      <Square className="mr-2 h-5 w-5" /> Stop
+                    <Button onClick={handleStopRecording} variant="destructive" className="w-full h-9 text-xs" disabled={isLoading}> {/* Reduced height and text size */}
+                      <Square className="mr-1.5 h-3.5 w-3.5" /> Stop {/* Reduced icon size and margin */}
                     </Button>
                   </>
                 ) : ( // Paused state
                   <>
-                    <Button onClick={handleResumeRecording} className="w-full" disabled={isLoading}>
-                      <Mic className="mr-2 h-5 w-5" /> Resume
+                    <Button onClick={handleResumeRecording} className="w-full h-9 text-xs" disabled={isLoading}> {/* Reduced height and text size */}
+                      <Mic className="mr-1.5 h-3.5 w-3.5" /> Resume {/* Reduced icon size and margin */}
                     </Button>
-                     <Button onClick={handleStopRecording} variant="destructive" className="w-full" disabled={isLoading}>
-                      <Square className="mr-2 h-5 w-5" /> Stop
+                     <Button onClick={handleStopRecording} variant="destructive" className="w-full h-9 text-xs" disabled={isLoading}> {/* Reduced height and text size */}
+                      <Square className="mr-1.5 h-3.5 w-3.5" /> Stop {/* Reduced icon size and margin */}
                     </Button>
                   </>
                 )}
@@ -265,58 +267,58 @@ const WhisperWriterPage: NextPage = () => {
             </div>
 
             <div className="relative">
-              <Label htmlFor="output-text" className="text-sm font-medium">Transcription / Formatted Text</Label>
+              <Label htmlFor="output-text" className="text-xs font-medium">Transcription / Formatted Text</Label> {/* Reduced text size */}
               <Textarea
                 id="output-text"
                 value={outputText}
-                onChange={(e) => setOutputText(e.target.value)} // Allow manual edits
+                onChange={(e) => setOutputText(e.target.value)}
                 placeholder={
                   recordingState === 'recording' ? "Listening..." : 
                   processingStage === 'transcribing' ? "Transcribing audio..." : 
                   processingStage === 'formatting' ? "Formatting text..." :
                   "Your transcribed and formatted text will appear here..."
                 }
-                rows={10}
-                className="mt-1 shadow-inner"
+                rows={6} // Reduced rows
+                className="mt-0.5 shadow-inner text-sm" // Reduced margin and text size
                 disabled={isRecordingActive || isLoading}
               />
             </div>
             
-            <Separator />
+            <Separator className="my-3"/> {/* Reduced margin */}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end"> {/* Reduced gap */}
               <div className="md:col-span-2">
-                <Label htmlFor="style-select" className="flex items-center mb-1">
-                  <Wand2 className="mr-2 h-4 w-4" /> Formatting Style
+                <Label htmlFor="style-select" className="flex items-center mb-0.5 text-xs"> {/* Reduced margin and text size */}
+                  <Wand2 className="mr-1.5 h-3.5 w-3.5" /> Formatting Style {/* Reduced icon size and margin */}
                 </Label>
                 <Select value={selectedStyle} onValueChange={setSelectedStyle} disabled={isRecordingActive || isLoading || !rawTranscription}>
-                  <SelectTrigger id="style-select">
+                  <SelectTrigger id="style-select" className="h-9 text-xs"> {/* Reduced height and text size */}
                     <SelectValue placeholder="Select style" />
                   </SelectTrigger>
                   <SelectContent>
                     {FORMATTING_STYLES.map((style) => (
-                      <SelectItem key={style.value} value={style.value}>
+                      <SelectItem key={style.value} value={style.value} className="text-xs"> {/* Reduced text size */}
                         {style.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleFormatText} className="w-full" disabled={isRecordingActive || isLoading || !rawTranscription}>
-                {processingStage === 'formatting' ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Wand2 className="mr-2 h-5 w-5" />}
+              <Button onClick={handleFormatText} className="w-full h-9 text-xs" disabled={isRecordingActive || isLoading || !rawTranscription}> {/* Reduced height and text size */}
+                {processingStage === 'formatting' ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />} {/* Reduced icon size and margin */}
                 Format Text
               </Button>
             </div>
 
-            <Button onClick={handleCopyToClipboard} variant="outline" className="w-full" disabled={!outputText || isLoading}>
-              <Copy className="mr-2 h-5 w-5" /> Copy to Clipboard
+            <Button onClick={handleCopyToClipboard} variant="outline" className="w-full h-9 text-xs" disabled={!outputText || isLoading}> {/* Reduced height and text size */}
+              <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy to Clipboard {/* Reduced icon size and margin */}
             </Button>
 
-            <div className="text-sm text-muted-foreground p-3 rounded-md border border-dashed flex items-center justify-center min-h-[40px]">
-              {isLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {processingStage === 'error' && <AlertTriangle className="h-4 w-4 text-destructive mr-2" />}
-              {processingStage === 'success' && outputText && <CheckCircle className="h-4 w-4 text-green-500 mr-2" />}
-              <span>{statusMessage}</span>
+            <div className="text-xs text-muted-foreground p-2 rounded-md border border-dashed flex items-center justify-center min-h-[34px]"> {/* Reduced padding, min-height and text size */}
+              {isLoading && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />} {/* Reduced icon size and margin */}
+              {processingStage === 'error' && <AlertTriangle className="h-3.5 w-3.5 text-destructive mr-1.5" />} {/* Reduced icon size and margin */}
+              {processingStage === 'success' && outputText && <CheckCircle className="h-3.5 w-3.5 text-green-500 mr-1.5" />} {/* Reduced icon size and margin */}
+              <span className="text-xs">{statusMessage}</span> {/* Reduced text size */}
             </div>
           </CardContent>
         </Card>

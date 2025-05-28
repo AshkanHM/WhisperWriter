@@ -2,10 +2,6 @@
   "name": "WhisperWriter",
   "short_name": "WhisperWriter",
   "description": "Real-time transcription and AI-powered text formatting",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#2A2A2E", 
-  "theme_color": "#3B82F6",
   "icons": [
     {
       "src": "/icons/app-icon.svg",
@@ -19,5 +15,10 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#14161A",
+  "theme_color": "#2563EB",
+  "orientation": "portrait-primary"
 }
