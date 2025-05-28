@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'WhisperWriter', // Updated title
   description: 'Real-time transcription and AI-powered text formatting',
+  manifest: '/manifest.json', // Added manifest link for PWA
 };
 
 export default function RootLayout({
