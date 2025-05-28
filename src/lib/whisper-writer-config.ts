@@ -18,8 +18,9 @@ export const LANGUAGES: SelectOption[] = [
 ];
 
 export const FORMATTING_STYLES: SelectOption[] = [
-  { value: 'Friendly WhatsApp chat', label: 'Friendly WhatsApp Chat' },
+  { value: 'Friendly WhatsApp chat (no emojis)', label: 'Friendly WhatsApp Chat (No Emojis)' },
   { value: 'Professional Email', label: 'Professional Email' },
+  { value: 'Semi-formal Work Chat (Google Chat/ClickUp)', label: 'Semi-formal Work Chat' },
   { value: 'Concise Summary', label: 'Concise Summary' },
   { value: 'Formal Report Snippet', label: 'Formal Report Snippet' },
   { value: 'Creative Story Idea', label: 'Creative Story Idea' },
@@ -27,4 +28,4 @@ export const FORMATTING_STYLES: SelectOption[] = [
 ];
 
 export const DEFAULT_LANGUAGE = 'en-US';
-export const DEFAULT_FORMATTING_STYLE = 'Friendly WhatsApp chat';
+export const DEFAULT_FORMATTING_STYLE = 'Friendly WhatsApp chat (no emojis)';

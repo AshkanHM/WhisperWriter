@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -30,7 +31,15 @@ const formatTextPrompt = ai.definePrompt({
   name: 'formatTextPrompt',
   input: {schema: FormatTextInputSchema},
   output: {schema: FormatTextOutputSchema},
-  prompt: `You are a text formatting expert. Please rewrite the following text in the style of a {{{style}}}.\n\nText: {{{text}}}`,
+  prompt: `You are a text formatting expert. Please rewrite the following text in the style of a {{{style}}}.
+
+IMPORTANT:
+- If the style is 'Friendly WhatsApp chat (no emojis)', ensure the output is casual and conversational AND STRICTLY DOES NOT INCLUDE ANY EMOJIS.
+- If the style is 'Semi-formal Work Chat (Google Chat/ClickUp)', make it appropriate for professional but slightly informal communication with colleagues and managers, suitable for platforms like Google Chat or ClickUp. It should be clear, concise, and maintain a respectful tone.
+
+For all other styles, adhere to their typical conventions.
+
+Text: {{{text}}}`,
   model: 'googleai/gemini-2.0-flash',
 });
 
