@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -54,7 +53,8 @@ If 'Requested Style' is 'Clean Up Text':
 If 'Requested Style' is 'Clarify & Restructure Text':
 - Go beyond basic cleanup. Rephrase and restructure the text to make it exceptionally clear, well-instructed, and easy to understand.
 - Improve sentence flow and coherence. Break down complex sentences if necessary.
-- Organize information logically, potentially using formatting like bullet points or numbered lists if it enhances readability and understanding.
+- Organize information logically. If the input text contains implicit or explicit lists, rewrite them using bullet points or numbered lists as appropriate to enhance readability and understanding.
+- If the input text has distinct conceptual parts, ensure the output clearly divides or segments these parts for improved readability and comprehension. This could involve using paragraph breaks, or other structural cues.
 - Ensure the core meaning is preserved but presented in a more effective and digestible manner. The goal is to transform the text into a highly comprehensible and well-organized piece.
 
 If 'Requested Style' is 'Friendly WhatsApp chat':
