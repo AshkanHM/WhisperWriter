@@ -1,7 +1,12 @@
+
 {
-  "name": "WhisperWriter",
-  "short_name": "WhisperWriter",
-  "description": "Real-time transcription and AI-powered text formatting",
+  "name": "GhostWriter",
+  "short_name": "GhostWriter",
+  "description": "Real-time transcription and AI-powered text formatting.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#202020",
+  "theme_color": "#3b82f6",
   "icons": [
     {
       "src": "/icons/app-icon.svg",
@@ -15,10 +20,5 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ],
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#14161A",
-  "theme_color": "#2563EB",
-  "orientation": "portrait-primary"
+  ]
 }
