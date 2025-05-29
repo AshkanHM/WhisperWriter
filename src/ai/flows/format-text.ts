@@ -15,7 +15,7 @@ import {z} from 'genkit';
 
 const FormatTextInputSchema = z.object({
   text: z.string().describe('The text to be formatted.'),
-  style: z.string().describe('The desired formatting style (e.g., Clean Up Text, Friendly WhatsApp chat, Professional Email).'),
+  style: z.string().describe('The desired formatting style (e.g., Clean Up Text, Clarify & Restructure Text, Friendly WhatsApp chat, Professional Email).'),
   language: z.string().optional().describe('The language of the input text (e.g., en-US, fa-IR). The output should be in this language.'),
 });
 export type FormatTextInput = z.infer<typeof FormatTextInputSchema>;
@@ -51,6 +51,12 @@ If 'Requested Style' is 'Clean Up Text':
 - Ensure proper text formatting and sentence structure according to the conventions of the 'Original Language'.
 - Do not significantly alter the tone or core message of the original text. The goal is a polished, grammatically correct, and well-formatted version of the input.
 
+If 'Requested Style' is 'Clarify & Restructure Text':
+- Go beyond basic cleanup. Rephrase and restructure the text to make it exceptionally clear, well-instructed, and easy to understand.
+- Improve sentence flow and coherence. Break down complex sentences if necessary.
+- Organize information logically, potentially using formatting like bullet points or numbered lists if it enhances readability and understanding.
+- Ensure the core meaning is preserved but presented in a more effective and digestible manner. The goal is to transform the text into a highly comprehensible and well-organized piece.
+
 If 'Requested Style' is 'Friendly WhatsApp chat':
 - Make the output very casual, natural, and friendly, as if talking to a close friend.
 - Ensure the tone is conversational, engaging, and light-hearted.
@@ -70,12 +76,6 @@ If 'Requested Style' is 'Concise Summary':
 If 'Requested Style' is 'Formal Report Snippet':
 - Adapt the text into a snippet suitable for a formal report. Use objective language and a structured, professional tone.
 
-If 'Requested Style' is 'Creative Story Idea':
-- Transform the text into a compelling and imaginative story idea or a snippet of a creative story.
-
-If 'Requested Style' is 'To-do List':
-- Convert the text into a clear and actionable to-do list format. Each item should represent a distinct task.
-
 For any other 'Requested Style' not explicitly detailed above, please interpret '{{{style}}}' broadly and rewrite the text to fit its typical conventions, always maintaining the 'Original Language'.
 
 Rewrite the text now.`,
@@ -93,3 +93,4 @@ const formatTextFlow = ai.defineFlow(
     return output!;
   }
 );
+

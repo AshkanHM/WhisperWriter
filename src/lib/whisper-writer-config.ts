@@ -21,14 +21,14 @@ export const LANGUAGES: SelectOption[] = [
 
 export const FORMATTING_STYLES: SelectOption[] = [
   { value: 'Clean Up Text', label: 'Clean Up Text' },
+  { value: 'Clarify & Restructure Text', label: 'Clarify & Restructure Text' },
   { value: 'Friendly WhatsApp chat', label: 'Friendly WhatsApp Chat' },
   { value: 'Semi-formal Work Chat (Google Chat/ClickUp)', label: 'Semi-formal Work Chat' },
   { value: 'Professional Email', label: 'Professional Email' },
   { value: 'Concise Summary', label: 'Concise Summary' },
   { value: 'Formal Report Snippet', label: 'Formal Report Snippet' },
-  { value: 'Creative Story Idea', label: 'Creative Story Idea' },
-  { value: 'To-do List', label: 'To-do List' },
 ];
 
 export const DEFAULT_LANGUAGE = 'en-US';
-export const DEFAULT_FORMATTING_STYLE = 'Clean Up Text'; // Updated default to the new style
+export const DEFAULT_FORMATTING_STYLE = 'Clean Up Text';
+
