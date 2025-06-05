@@ -1,9 +1,8 @@
 
-// 'use server';
 /**
- * @fileOverview Real-time audio transcription using the OpenAI Whisper API.
+ * @fileOverview Audio transcription using Google Generative AI.
  *
- * - transcribeAudio - A function to transcribe audio in real-time.
+ * - transcribeAudio - A function to transcribe audio.
  * - TranscribeAudioInput - The input type for the transcribeAudio function.
  * - TranscribeAudioOutput - The return type for the transcribeAudio function.
  */
@@ -44,7 +43,27 @@ The primary language of the audio is {{{language}}}. Please prioritize transcrip
 Audio: {{media url=audioDataUri}}
 
 Transcription:`,
-  model: 'googleai/gemini-2.0-flash'
+  model: 'googleai/gemini-2.0-flash',
+  config: {
+    safetySettings: [
+      {
+        category: 'HARM_CATEGORY_HATE_SPEECH',
+        threshold: 'BLOCK_ONLY_HIGH',
+      },
+      {
+        category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+        threshold: 'BLOCK_NONE',
+      },
+      {
+        category: 'HARM_CATEGORY_HARASSMENT',
+        threshold: 'BLOCK_ONLY_HIGH',
+      },
+      {
+        category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+        threshold: 'BLOCK_NONE',
+      },
+    ],
+  },
 });
 
 const transcribeAudioFlow = ai.defineFlow(
@@ -58,4 +77,3 @@ const transcribeAudioFlow = ai.defineFlow(
     return output!;
   }
 );
-
