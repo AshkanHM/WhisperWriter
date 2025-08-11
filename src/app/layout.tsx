@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'GhostWriter', // Updated title
+  title: 'Whisper Writer', // Updated title
   description: 'Real-time transcription and AI-powered text formatting', // Description can remain or be updated if needed
   manifest: '/manifest.json',
 };

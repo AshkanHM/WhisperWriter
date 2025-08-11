@@ -1,4 +1,4 @@
-<svg width="192" height="192" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" id="ghostwriter-icon">
-    <rect width="24" height="24" rx="4" fill="white"/>
-    <path d="M4 10C5.33333 6.66667 7.66667 6 9 10C10 13.3333 10.3333 14.6667 12 6C13.6667 14.6667 14 14 15 10C16.3333 6.66667 18.6667 7.33333 20 10" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+<svg id="whisper-writer-icon" width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="512" height="512" rx="102.4" fill="white"/>
+<path d="M85.3333 256H128V426.667H85.3333V256ZM213.333 128H256V426.667H213.333V128ZM341.333 85.3333H384V384H341.333V85.3333ZM42.6667 341.333H0V426.667H42.6667V341.333ZM170.667 213.333H170.667V426.667H170.667V213.333ZM298.667 213.333H298.667V426.667H298.667V213.333ZM426.667 256H426.667V341.333H426.667V256ZM469.333 170.667H469.333V384H469.333V170.667Z" stroke="black" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
