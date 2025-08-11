@@ -27,6 +27,7 @@ import {
   Languages,
   CheckCircle,
   AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 import {
   LANGUAGES,
@@ -45,8 +46,8 @@ const WhisperWriterPage: NextPage = () => {
   const [recordingState, setRecordingState] = useState<RecordingState>('idle');
   const [processingStage, setProcessingStage] = useState<ProcessingStage>('idle');
   const [selectedLanguage, setSelectedLanguage] = useState<string>(DEFAULT_LANGUAGE);
-  const [outputText, setOutputText] = useState<string>('');
-  const [rawTranscription, setRawTranscription] = useState<string>('');
+  const [transcription, setTranscription] = useState<string>('');
+  const [formattedText, setFormattedText] = useState<string>('');
   const [selectedStyle, setSelectedStyle] = useState<string>(DEFAULT_FORMATTING_STYLE);
   const [statusMessage, setStatusMessage] = useState<string>('Ready to record.');
   
@@ -56,12 +57,28 @@ const WhisperWriterPage: NextPage = () => {
 
   const HOTKEY = 'Alt+R';
 
+  const resetState = () => {
+    setRecordingState('idle');
+    setProcessingStage('idle');
+    setSelectedLanguage(DEFAULT_LANGUAGE);
+    setTranscription('');
+    setFormattedText('');
+    setSelectedStyle(DEFAULT_FORMATTING_STYLE);
+    setStatusMessage('Ready to record.');
+    if (mediaRecorderRef.current?.stream) {
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    }
+    mediaRecorderRef.current = null;
+    audioChunksRef.current = [];
+  };
+
   const handleStartRecording = async () => {
     if (recordingState === 'recording') return;
-    setStatusMessage('Initializing recording...');
+    // Reset relevant fields before starting a new recording
+    setTranscription('');
+    setFormattedText('');
     setProcessingStage('idle');
-    setOutputText('');
-    setRawTranscription('');
+    setStatusMessage('Initializing recording...');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({audio: true});
       mediaRecorderRef.current = new MediaRecorder(stream);
@@ -84,9 +101,8 @@ const WhisperWriterPage: NextPage = () => {
               audioDataUri: base64Audio,
               language: selectedLanguage,
             });
-            setRawTranscription(transcriptionResult.transcription);
-            setOutputText(transcriptionResult.transcription);
-            setStatusMessage('Transcription complete. Ready to format or copy.');
+            setTranscription(transcriptionResult.transcription);
+            setStatusMessage('Transcription complete. Edit if needed, then format.');
             setProcessingStage('success');
           } catch (error) {
             console.error('Transcription error:', error);
@@ -130,7 +146,6 @@ const WhisperWriterPage: NextPage = () => {
     if (mediaRecorderRef.current && (recordingState === 'recording' || recordingState === 'paused')) {
       mediaRecorderRef.current.stop();
       setRecordingState('stopped'); // 'stopped' is a transient state before transcription begins
-      // Actual status update will happen in onstop handler
     }
   };
 
@@ -140,7 +155,7 @@ const WhisperWriterPage: NextPage = () => {
     } else if (recordingState === 'recording') {
       handleStopRecording(); 
     } else if (recordingState === 'paused') {
-      handleResumeRecording(); // Or stop, depending on desired hotkey behavior for pause
+      handleResumeRecording();
     }
   }, [recordingState, selectedLanguage]);
 
@@ -159,19 +174,19 @@ const WhisperWriterPage: NextPage = () => {
 
 
   const handleFormatText = async () => {
-    if (!rawTranscription) {
-      toast({title: 'No Text to Format', description: 'Please record and transcribe audio first.', variant: 'default'});
+    if (!transcription) {
+      toast({title: 'No Text to Format', description: 'Please record or type text into the transcription box first.', variant: 'default'});
       return;
     }
     setStatusMessage('Formatting text...');
     setProcessingStage('formatting');
     try {
       const formatResult = await formatText({
-        text: rawTranscription,
+        text: transcription,
         style: selectedStyle,
-        language: selectedLanguage, // Pass the selected language
+        language: selectedLanguage,
       });
-      setOutputText(formatResult.formattedText);
+      setFormattedText(formatResult.formattedText);
       setStatusMessage('Text formatting complete.');
       setProcessingStage('success');
     } catch (error) {
@@ -183,14 +198,14 @@ const WhisperWriterPage: NextPage = () => {
   };
 
   const handleCopyToClipboard = () => {
-    if (!outputText) {
-      toast({title: 'Nothing to Copy', description: 'The text area is empty.', variant: 'default'});
+    if (!formattedText) {
+      toast({title: 'Nothing to Copy', description: 'The formatted text box is empty.', variant: 'default'});
       return;
     }
-    navigator.clipboard.writeText(outputText)
+    navigator.clipboard.writeText(formattedText)
       .then(() => {
-        toast({title: 'Copied to Clipboard!', description: 'The text has been copied.'});
-        setStatusMessage('Text copied to clipboard.');
+        toast({title: 'Copied to Clipboard!', description: 'The formatted text has been copied.'});
+        setStatusMessage('Formatted text copied to clipboard.');
       })
       .catch(err => {
         console.error('Failed to copy text: ', err);
@@ -208,11 +223,12 @@ const WhisperWriterPage: NextPage = () => {
         <title>Whisper Writer - Real-time Transcription & Formatting</title>
       </Head>
       <div className="min-h-screen flex flex-col items-center justify-center p-1 sm:p-2 bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
-        <Card className="w-full max-w-md shadow-2xl">
+        <Card className="w-full max-w-sm shadow-2xl">
           <CardHeader className="text-center pb-2 pt-3">
-            <div className="flex items-center justify-center space-x-1 mb-1">
-                <svg width="20" height="20" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary">
-                  <path d="M85.3333 256H128V426.667H85.3333V256ZM213.333 128H256V426.667H213.333V128ZM341.333 85.3333H384V384H341.333V85.3333ZM42.6667 341.333H0V426.667H42.6667V341.333ZM170.667 213.333H170.667V426.667H170.667V213.333ZM298.667 213.333H298.667V426.667H298.667V213.333ZM426.667 256H426.667V341.333H426.667V256ZM469.333 170.667H469.333V384H469.333V170.667Z" stroke="currentColor" strokeWidth="32" strokeLinecap="round" strokeLinejoin="round"/>
+             <div className="flex items-center justify-center space-x-1.5 mb-1">
+                 <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4,24C4,24 10,12,24,12C38,12 44,24,44,24C44,24 38,36,24,36C10,36 4,24,4,24Z" fill="none" stroke="currentColor" strokeWidth="4" strokeLinejoin="round"/>
+                  <path d="M24,29C26.7614,29,29,26.7614,29,24C29,21.2386,26.7614,19,24,19C21.2386,19,19,21.2386,19,24C19,26.7614,21.2386,29,24,29Z" fill="none" stroke="currentColor" strokeWidth="4" strokeLinejoin="round"/>
                 </svg>
                 <CardTitle className="text-lg font-bold">Whisper Writer</CardTitle>
             </div>
@@ -224,7 +240,7 @@ const WhisperWriterPage: NextPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
               <div className="md:col-span-1">
                 <Label htmlFor="language-select" className="flex items-center mb-0.5 text-xs">
-                  <Languages className="mr-1.5 h-3 w-3" /> Language
+                  <Languages className="mr-1 h-3 w-3" /> Language
                 </Label>
                 <Select value={selectedLanguage} onValueChange={setSelectedLanguage} disabled={isRecordingActive || isLoading}>
                   <SelectTrigger id="language-select" className="h-9 text-xs">
@@ -242,24 +258,24 @@ const WhisperWriterPage: NextPage = () => {
               <div className="md:col-span-2 flex space-x-1.5">
                 {recordingState === 'idle' || recordingState === 'stopped' ? (
                   <Button onClick={handleStartRecording} className="w-full h-9 text-xs" disabled={isLoading}>
-                    <Mic className="mr-1.5 h-3.5 w-3.5" /> Record
+                    <Mic className="mr-1.5 h-3 w-3" /> Record
                   </Button>
                 ) : recordingState === 'recording' ? (
                   <>
                     <Button onClick={handlePauseRecording} variant="outline" className="w-full h-9 text-xs" disabled={isLoading}>
-                      <Pause className="mr-1.5 h-3.5 w-3.5" /> Pause
+                      <Pause className="mr-1.5 h-3 w-3" /> Pause
                     </Button>
                     <Button onClick={handleStopRecording} variant="destructive" className="w-full h-9 text-xs" disabled={isLoading}>
-                      <Square className="mr-1.5 h-3.5 w-3.5" /> Stop
+                      <Square className="mr-1.5 h-3 w-3" /> Stop
                     </Button>
                   </>
                 ) : ( // Paused state
                   <>
                     <Button onClick={handleResumeRecording} className="w-full h-9 text-xs" disabled={isLoading}>
-                      <Mic className="mr-1.5 h-3.5 w-3.5" /> Resume
+                      <Mic className="mr-1.5 h-3 w-3" /> Resume
                     </Button>
                      <Button onClick={handleStopRecording} variant="destructive" className="w-full h-9 text-xs" disabled={isLoading}>
-                      <Square className="mr-1.5 h-3.5 w-3.5" /> Stop
+                      <Square className="mr-1.5 h-3 w-3" /> Stop
                     </Button>
                   </>
                 )}
@@ -267,18 +283,17 @@ const WhisperWriterPage: NextPage = () => {
             </div>
 
             <div className="relative">
-              <Label htmlFor="output-text" className="text-xs font-medium">Transcription / Formatted Text</Label>
+              <Label htmlFor="transcription-text" className="text-xs font-medium">Transcription (Editable)</Label>
               <Textarea
-                id="output-text"
-                value={outputText}
-                onChange={(e) => setOutputText(e.target.value)}
+                id="transcription-text"
+                value={transcription}
+                onChange={(e) => setTranscription(e.target.value)}
                 placeholder={
                   recordingState === 'recording' ? "Listening..." : 
                   processingStage === 'transcribing' ? "Transcribing audio..." : 
-                  processingStage === 'formatting' ? "Formatting text..." :
-                  "Your transcribed and formatted text will appear here..."
+                  "Your transcribed text will appear here. You can edit it before formatting."
                 }
-                rows={5}
+                rows={4}
                 className="mt-0.5 shadow-inner text-sm"
                 disabled={isRecordingActive || isLoading}
               />
@@ -289,9 +304,9 @@ const WhisperWriterPage: NextPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
               <div className="md:col-span-2">
                 <Label htmlFor="style-select" className="flex items-center mb-0.5 text-xs">
-                  <Wand2 className="mr-1.5 h-3 w-3" /> Formatting Style
+                  <Wand2 className="mr-1 h-3 w-3" /> Formatting Style
                 </Label>
-                <Select value={selectedStyle} onValueChange={setSelectedStyle} disabled={isRecordingActive || isLoading || !rawTranscription}>
+                <Select value={selectedStyle} onValueChange={setSelectedStyle} disabled={isRecordingActive || isLoading || !transcription}>
                   <SelectTrigger id="style-select" className="h-9 text-xs">
                     <SelectValue placeholder="Select style" />
                   </SelectTrigger>
@@ -304,21 +319,39 @@ const WhisperWriterPage: NextPage = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleFormatText} className="w-full h-9 text-xs" disabled={isRecordingActive || isLoading || !rawTranscription}>
-                {processingStage === 'formatting' ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3.5 w-3.5" />}
-                Format Text
+              <Button onClick={handleFormatText} className="w-full h-9 text-xs" disabled={isRecordingActive || isLoading || !transcription}>
+                {processingStage === 'formatting' ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3 w-3" />}
+                Format
               </Button>
             </div>
-
-            <Button onClick={handleCopyToClipboard} variant="outline" className="w-full h-9 text-xs" disabled={!outputText || isLoading}>
-              <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy to Clipboard
-            </Button>
+            
+            <div className="relative">
+                <Label htmlFor="formatted-text" className="text-xs font-medium">AI-Enhanced Text</Label>
+                <Textarea
+                    id="formatted-text"
+                    value={formattedText}
+                    readOnly
+                    placeholder="Your formatted text will appear here..."
+                    rows={5}
+                    className="mt-0.5 shadow-inner text-sm bg-muted/50"
+                    disabled={isLoading}
+                />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+                <Button onClick={handleCopyToClipboard} variant="outline" className="w-full h-9 text-xs" disabled={!formattedText || isLoading}>
+                  <Copy className="mr-1.5 h-3 w-3" /> Copy
+                </Button>
+                <Button onClick={resetState} variant="ghost" className="w-full h-9 text-xs" disabled={isLoading}>
+                  <RefreshCw className="mr-1.5 h-3 w-3" /> Reset
+                </Button>
+            </div>
 
             <div className="text-xs text-muted-foreground p-2 rounded-md border border-dashed flex items-center justify-center min-h-[34px]">
-              {isLoading && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
-              {processingStage === 'error' && <AlertTriangle className="h-3.5 w-3.5 text-destructive mr-1.5" />}
-              {processingStage === 'success' && outputText && <CheckCircle className="h-3.5 w-3.5 text-green-500 mr-1.5" />}
-              <span className="text-xs">{statusMessage}</span>
+              {isLoading && <Loader2 className="h-3 w-3 animate-spin mr-1.5" />}
+              {processingStage === 'error' && <AlertTriangle className="h-3 w-3 text-destructive mr-1.5" />}
+              {processingStage === 'success' && (transcription || formattedText) && <CheckCircle className="h-3 w-3 text-green-500 mr-1.5" />}
+              <span className="text-center">{statusMessage}</span>
             </div>
           </CardContent>
         </Card>
@@ -328,3 +361,5 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
+
+    
