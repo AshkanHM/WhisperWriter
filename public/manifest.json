@@ -1,11 +1,11 @@
 {
   "name": "Whisper Writer",
   "short_name": "Whisper Writer",
-  "description": "An AI-powered real-time transcription and text formatting app.",
+  "description": "Real-time transcription and AI-powered text formatting",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#262626",
-  "theme_color": "#3b82f6",
+  "background_color": "#111827",
+  "theme_color": "#111827",
   "icons": [
     {
       "src": "/icons/app-icon.svg",
