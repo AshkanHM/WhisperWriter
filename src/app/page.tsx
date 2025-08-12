@@ -242,11 +242,11 @@ const WhisperWriterPage: NextPage = () => {
   
   const getSelectedLanguageLabel = () => {
       const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
+      if (['en-US', 'fa-IR'].includes(selectedLanguage)) return 'More Languages';
       return selectedLang ? selectedLang.label : 'More Languages';
   };
 
   const moreLanguagesButtonLabel = getSelectedLanguageLabel();
-  const showCustomLanguage = !['en-US', 'fa-IR'].includes(selectedLanguage);
 
 
   return (
@@ -256,14 +256,14 @@ const WhisperWriterPage: NextPage = () => {
       </Head>
       <div className="flex flex-col h-screen w-screen overflow-hidden bg-background">
         {/* Header */}
-        <header className={cn("fixed top-0 left-0 right-0 z-20 w-full h-40 transition-colors duration-500 flex flex-col justify-center items-center p-4", headerBgClass())}>
+        <header className={cn("fixed top-0 left-0 right-0 z-20 w-full h-40 transition-colors duration-500 flex flex-col justify-start items-center p-4", headerBgClass())}>
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/50 opacity-50"></div>
            <Button onClick={() => setLanguageModalOpen(true)} variant={'ghost'} size="icon" className="absolute top-4 left-4 rounded-full h-12 w-auto px-4">
-              {showCustomLanguage ? <span className="text-sm">{moreLanguagesButtonLabel}</span> : <Languages className="h-6 w-6" />}
+              {moreLanguagesButtonLabel === 'More Languages' ? <Languages className="h-6 w-6" /> : <span className="text-sm">{moreLanguagesButtonLabel}</span>}
           </Button>
-          <div className="relative z-10 flex flex-col items-center text-center">
-            <img src="/icons/WWlogo.webp" alt="Whisper Writer Logo" className="h-12 w-auto" />
-            <img src="/icons/WWlogotype.webp" alt="Whisper Writer Logotype" className="h-8 w-auto mt-2" />
+          <div className="relative z-10 flex flex-col items-center text-center mt-2">
+            <img src="/icons/WW-Logo.webp" alt="Whisper Writer Logo" className="h-10 w-auto" />
+            <img src="/icons/WW-Logo-Type.webp" alt="Whisper Writer Logotype" className="h-4 w-auto mt-1" />
           </div>
           {/* Recording Controls - Moved into Header */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4">
@@ -394,3 +394,5 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
+
+    
