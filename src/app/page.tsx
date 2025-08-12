@@ -50,6 +50,13 @@ import {cn} from '@/lib/utils';
 type RecordingState = 'idle' | 'recording' | 'paused' | 'stopped';
 type ProcessingStage = 'idle' | 'transcribing' | 'formatting' | 'error' | 'success';
 
+const HEADER_IMAGES = {
+  neutral: '/Images/neutral_state.webp',
+  recording: '/Images/recording_state.webp',
+  transcribing: '/Images/transcripting_state.webp',
+  done: '/Images/done_state.webp',
+};
+
 const WhisperWriterPage: NextPage = () => {
   const [recordingState, setRecordingState] = useState<RecordingState>('idle');
   const [processingStage, setProcessingStage] = useState<ProcessingStage>('idle');
@@ -238,14 +245,15 @@ const WhisperWriterPage: NextPage = () => {
   const isRecording = recordingState === 'recording' || recordingState === 'paused';
   const showCancelAndStop = recordingState === 'recording' || recordingState === 'paused';
 
-  const headerBgClass = () => {
-    if (isRecording) return 'bg-[hsl(var(--header-recording-bg))]';
-    if (processingStage === 'success') return 'bg-[hsl(var(--header-success-bg))]';
-    return 'bg-[hsl(var(--header-idle-bg))]';
+  const getHeaderState = () => {
+    if (isRecording) return 'recording';
+    if (processingStage === 'transcribing' || processingStage === 'formatting') return 'transcribing';
+    if (processingStage === 'success') return 'done';
+    return 'neutral';
   };
   
   const getSelectedLanguageLabel = () => {
-    if (selectedLanguage === DEFAULT_LANGUAGE || selectedLanguage === 'fa-IR') {
+    if (selectedLanguage === DEFAULT_LANGUAGE || selectedLanguage === 'fa-IR' || !LANGUAGES.find(l => l.value === selectedLanguage)) {
         return 'More Languages';
     }
     const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
@@ -259,32 +267,37 @@ const WhisperWriterPage: NextPage = () => {
     <>
       <Head>
         <title>Whisper Writer - AI-Powered Transcription & Formatting</title>
+        {/* Preload header images */}
+        <link rel="preload" href={HEADER_IMAGES.neutral} as="image" />
+        <link rel="preload" href={HEADER_IMAGES.recording} as="image" />
+        <link rel="preload" href={HEADER_IMAGES.transcribing} as="image" />
+        <link rel="preload" href={HEADER_IMAGES.done} as="image" />
       </Head>
       <div className="flex flex-col h-screen w-screen overflow-hidden bg-background">
         {/* Header */}
-        <header 
-            className={cn("fixed top-0 left-0 right-0 z-20 w-full h-40 transition-colors duration-500 flex flex-col justify-start items-center p-4", headerBgClass())}
-            style={{
-                backgroundImage: `
-                    radial-gradient(circle at 50% 100%, transparent 0, transparent 24%, hsl(var(--primary) / 0.1) 24%, hsl(var(--primary) / 0.1) 32%, transparent 32%),
-                    radial-gradient(circle at 50% 100%, transparent 0, transparent 42%, hsl(var(--primary) / 0.1) 42%, hsl(var(--primary) / 0.1) 50%, transparent 50%),
-                    radial-gradient(circle at 50% 100%, transparent 0, transparent 65%, hsl(var(--primary) / 0.1) 65%, hsl(var(--primary) / 0.1) 73%, transparent 73%)
-                `,
-                backgroundSize: '100% 100%',
-                backgroundRepeat: 'no-repeat',
-            }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/50 opacity-50"></div>
-           <Button onClick={() => setLanguageModalOpen(true)} variant={'ghost'} size="icon" className="absolute top-4 left-4 rounded-full h-12 w-auto px-4">
+        <header className="fixed top-0 left-0 right-0 z-20 w-full h-40 flex flex-col justify-start items-center p-4">
+          {/* Background Images */}
+          {Object.entries(HEADER_IMAGES).map(([state, src]) => (
+            <div
+              key={state}
+              className={cn(
+                "absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-500 ease-in-out",
+                getHeaderState() === state ? "opacity-100" : "opacity-0"
+              )}
+              style={{ backgroundImage: `url(${src})` }}
+            />
+          ))}
+
+           <Button onClick={() => setLanguageModalOpen(true)} variant={'ghost'} size="icon" className="absolute top-4 left-4 rounded-full h-12 w-auto px-4 z-10">
               {moreLanguagesButtonLabel === 'More Languages' ? <Languages className="h-6 w-6" /> : <span className="text-sm">{moreLanguagesButtonLabel}</span>}
           </Button>
           <div className="relative z-10 flex flex-col items-center text-center -mt-2">
             <img src="/Images/WW_Logo.png" alt="Whisper Writer Logo" className="h-20 w-auto" />
           </div>
           {/* Recording Controls - Moved into Header */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4 z-10">
               {showCancelAndStop && (
-                  <Button onClick={handleCancelRecording} size="icon" variant="destructive" className="w-16 h-16 rounded-full bg-red-900/80">
+                  <Button onClick={handleCancelRecording} size="icon" variant="destructive" className="w-16 h-16 rounded-full bg-red-900/80 hover:bg-red-900/70">
                       <Trash2 className="h-8 w-8" />
                   </Button>
               )}
@@ -292,7 +305,7 @@ const WhisperWriterPage: NextPage = () => {
               {(recordingState === 'idle' || recordingState === 'stopped') && (
                   <>
                       <Button onClick={() => setSelectedLanguage('en-US')} variant={selectedLanguage === 'en-US' ? 'secondary' : 'ghost'} className="rounded-full h-12">EN</Button>
-                      <Button onClick={handleStartRecording} size="icon" className="w-28 h-28 rounded-full bg-rose-200/10 shadow-lg text-5xl">
+                      <Button onClick={handleStartRecording} size="icon" className="w-28 h-28 rounded-full bg-rose-200/10 shadow-lg text-5xl hover:bg-rose-200/20">
                           🎙️
                       </Button>
                       <Button onClick={() => setSelectedLanguage('fa-IR')} variant={selectedLanguage === 'fa-IR' ? 'secondary' : 'ghost'} className="rounded-full h-12">FA</Button>
@@ -300,13 +313,13 @@ const WhisperWriterPage: NextPage = () => {
               )}
 
               {isRecording && (
-                <Button onClick={recordingState === 'recording' ? handlePauseRecording : handleResumeRecording} size="icon" className="w-28 h-28 rounded-full bg-red-500/80 shadow-lg">
+                <Button onClick={recordingState === 'recording' ? handlePauseRecording : handleResumeRecording} size="icon" className="w-28 h-28 rounded-full bg-red-500/80 shadow-lg hover:bg-red-500/70">
                   {recordingState === 'recording' ? <Pause className="h-14 w-14" /> : <span className="text-5xl">🎙️</span>}
                 </Button>
               )}
               
               {showCancelAndStop && (
-                <Button onClick={handleStopRecording} size="icon" variant="secondary" className="w-16 h-16 rounded-full bg-green-500/80">
+                <Button onClick={handleStopRecording} size="icon" variant="secondary" className="w-16 h-16 rounded-full bg-green-500/80 hover:bg-green-500/70">
                     <StopCircle className="h-8 w-8" />
                 </Button>
               )}
@@ -410,3 +423,5 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
+
+    
