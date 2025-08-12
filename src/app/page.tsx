@@ -251,15 +251,9 @@ const WhisperWriterPage: NextPage = () => {
   };
   
   const getSelectedLanguageLabel = () => {
-    if (selectedLanguage === DEFAULT_LANGUAGE || selectedLanguage === 'fa-IR' || !LANGUAGES.find(l => l.value === selectedLanguage)) {
-        return 'More Languages';
-    }
       const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
       return selectedLang ? selectedLang.label : 'More Languages';
   };
-
-  const moreLanguagesButtonLabel = getSelectedLanguageLabel();
-
 
   return (
     <>
@@ -286,9 +280,10 @@ const WhisperWriterPage: NextPage = () => {
             />
           ))}
 
-           <Button onClick={() => setLanguageModalOpen(true)} variant={'ghost'} size="icon" className="absolute top-4 left-4 rounded-full h-12 w-auto px-4 z-10">
-              {moreLanguagesButtonLabel === 'More Languages' ? <Languages className="h-6 w-6" /> : <span className="text-sm">{moreLanguagesButtonLabel}</span>}
-          </Button>
+           <button onClick={() => setLanguageModalOpen(true)} className="glossy-badge absolute top-4 left-4 z-10 !mb-0">
+                <Languages className="h-5 w-5" />
+                <span>More Languages</span>
+            </button>
           <div className="relative z-10 flex flex-col items-center text-center -mt-2">
             <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[47px] w-auto" />
           </div>
@@ -328,10 +323,10 @@ const WhisperWriterPage: NextPage = () => {
         <div className="absolute top-40 left-0 h-48 w-full flex-shrink-0 bg-gradient-to-b from-[var(--bg)] to-transparent z-10 pointer-events-none" />
 
         {/* Main Content */}
-        <main className="relative flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-48 main-bg z-0">
+        <main className="relative flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-56 main-bg z-0">
           
           {/* Text Areas & Controls */}
-          <div className="w-full max-w-lg space-y-6 flex flex-col items-center z-0 pt-20">
+          <div className="w-full max-w-lg space-y-6 flex flex-col items-center z-0">
             
             <div className="glossy-card">
               <div className="glossy-badge"><span className="dot"></span> Transcription (Editable)</div>
@@ -412,7 +407,7 @@ const WhisperWriterPage: NextPage = () => {
           </DialogHeader>
           <ScrollArea className="flex-1">
              <div className="flex flex-col space-y-1 pr-4">
-                {LANGUAGES.filter(lang => lang.value !== 'en-US' && lang.value !== 'fa-IR').map((lang) => (
+                {LANGUAGES.map((lang) => (
                   <Button
                     key={lang.value}
                     variant={selectedLanguage === lang.value ? "secondary" : "ghost"}
@@ -432,4 +427,3 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
-
