@@ -89,8 +89,6 @@ const WhisperWriterPage: NextPage = () => {
 
   const handleStartRecording = async () => {
     if (recordingState === 'recording') return;
-    setTranscription('');
-    setFormattedText('');
     setProcessingStage('idle');
     isCancelledRef.current = false; // Reset cancellation flag
     try {
@@ -127,7 +125,8 @@ const WhisperWriterPage: NextPage = () => {
               audioDataUri: base64Audio,
               language: selectedLanguage,
             });
-            setTranscription(transcriptionResult.transcription);
+            // Append new transcription to the existing one
+            setTranscription(prev => prev ? `${prev} ${transcriptionResult.transcription}` : transcriptionResult.transcription);
             setProcessingStage('success');
           } catch (error) {
             console.error('Transcription error:', error);
