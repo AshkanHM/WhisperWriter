@@ -325,12 +325,12 @@ const WhisperWriterPage: NextPage = () => {
 
 
         {/* Main Content */}
-        <main className="relative flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-64 main-bg">
+        <main className="relative flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-48 main-bg">
           {/* Shader layer */}
-          <div className="sticky top-0 h-32 w-full flex-shrink-0 bg-gradient-to-b from-[var(--bg)] to-transparent -mt-32 z-10" />
+          <div className="sticky top-0 h-32 w-full flex-shrink-0 bg-gradient-to-b from-[var(--bg)] to-transparent -mt-48 z-10 pointer-events-none" />
           
           {/* Text Areas & Controls */}
-          <div className="w-full max-w-lg space-y-6 flex flex-col items-center -mt-32">
+          <div className="w-full max-w-lg space-y-6 flex flex-col items-center -mt-20">
             
             <div className="glossy-card">
               <div className="glossy-badge"><span className="dot"></span> Transcription (Editable)</div>
@@ -428,3 +428,5 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
+
+    
