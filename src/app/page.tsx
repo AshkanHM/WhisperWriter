@@ -234,6 +234,10 @@ const WhisperWriterPage: NextPage = () => {
     if (processingStage === 'success') return 'bg-[hsl(var(--header-success-bg))]';
     return 'bg-[hsl(var(--header-idle-bg))]';
   };
+  
+  const selectedLanguageLabel = LANGUAGES.find(lang => lang.value === selectedLanguage)?.label.split(' ')[0].toUpperCase().substring(0, 2);
+  const showLanguageBadge = !['EN', 'FA'].includes(selectedLanguageLabel || '');
+
 
   return (
     <>
@@ -283,7 +287,8 @@ const WhisperWriterPage: NextPage = () => {
           </div>
           {!(isRecording || showCancelAndStop) && (
              <Button onClick={() => setLanguageModalOpen(true)} variant="ghost" size="sm">
-                <Languages className="mr-2 h-4 w-4" /> More Languages
+                <Languages className="mr-2 h-4 w-4" />
+                {showLanguageBadge ? selectedLanguageLabel : 'More Languages'}
               </Button>
           )}
 
@@ -381,7 +386,5 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
-
-    
 
     
