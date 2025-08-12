@@ -217,7 +217,7 @@ const WhisperWriterPage: NextPage = () => {
                   </Button>
               )}
 
-              {recordingState === 'idle' && (
+              {(recordingState === 'idle' || recordingState === 'stopped') && (
                   <>
                       <Button onClick={() => handleLanguageSelect('en-US')} variant={selectedLanguage === 'en-US' ? 'secondary' : 'ghost'} className="rounded-full h-12">EN</Button>
                       <Button onClick={handleStartRecording} size="icon" className="w-24 h-24 rounded-full bg-rose-200/10 hover:bg-rose-200/20 shadow-lg">
