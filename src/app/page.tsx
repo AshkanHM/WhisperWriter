@@ -253,8 +253,8 @@ const WhisperWriterPage: NextPage = () => {
     if (selectedLanguage === DEFAULT_LANGUAGE || selectedLanguage === 'fa-IR' || !LANGUAGES.find(l => l.value === selectedLanguage)) {
         return 'More Languages';
     }
-    const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
-    return selectedLang ? selectedLang.label : 'More Languages';
+      const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
+      return selectedLang ? selectedLang.label : 'More Languages';
   };
 
   const moreLanguagesButtonLabel = getSelectedLanguageLabel();
@@ -323,11 +323,11 @@ const WhisperWriterPage: NextPage = () => {
           </div>
         </header>
 
+        {/* Shader layer */}
+        <div className="absolute top-40 left-0 h-48 w-full flex-shrink-0 bg-gradient-to-b from-[var(--bg)] to-transparent z-10 pointer-events-none" />
 
         {/* Main Content */}
-        <main className="relative flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-48 main-bg">
-          {/* Shader layer */}
-          <div className="absolute top-0 left-0 h-48 w-full flex-shrink-0 bg-gradient-to-b from-[var(--bg)] to-transparent z-10 pointer-events-none" />
+        <main className="relative flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-48 main-bg z-0">
           
           {/* Text Areas & Controls */}
           <div className="w-full max-w-lg space-y-6 flex flex-col items-center z-0 pt-20">
@@ -429,4 +429,3 @@ const WhisperWriterPage: NextPage = () => {
 
 export default WhisperWriterPage;
 
-    
