@@ -325,7 +325,7 @@ const WhisperWriterPage: NextPage = () => {
 
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-56 main-bg">
+        <main className="flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-64 main-bg">
           {/* Text Areas & Controls */}
           <div className="w-full max-w-lg space-y-6 flex flex-col items-center">
             
@@ -425,5 +425,7 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
+
+    
 
     
