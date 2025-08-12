@@ -289,12 +289,12 @@ const WhisperWriterPage: NextPage = () => {
               {moreLanguagesButtonLabel === 'More Languages' ? <Languages className="h-6 w-6" /> : <span className="text-sm">{moreLanguagesButtonLabel}</span>}
           </Button>
           <div className="relative z-10 flex flex-col items-center text-center -mt-2">
-            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[58px] w-auto" />
+            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[52px] w-auto" />
           </div>
           {/* Recording Controls - Moved into Header */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4 z-20">
               {showCancelAndStop && (
-                  <Button onClick={handleCancelRecording} size="icon" variant="destructive" className="w-16 h-16 rounded-full bg-red-900/80 hover:bg-red-900/80">
+                  <Button onClick={handleCancelRecording} size="icon" variant="destructive" className="w-16 h-16 rounded-full bg-red-900/80">
                       <Trash2 className="h-8 w-8" />
                   </Button>
               )}
@@ -302,7 +302,7 @@ const WhisperWriterPage: NextPage = () => {
               {(recordingState === 'idle' || recordingState === 'stopped') && (
                   <>
                       <Button onClick={() => setSelectedLanguage('en-US')} variant={selectedLanguage === 'en-US' ? 'secondary' : 'ghost'} className="rounded-full h-12">EN</Button>
-                      <Button onClick={handleStartRecording} size="icon" className="w-36 h-36 rounded-full bg-rose-200/10 shadow-lg text-6xl hover:bg-rose-200/10">
+                      <Button onClick={handleStartRecording} size="icon" className="w-36 h-36 rounded-full bg-rose-200/10 shadow-lg text-6xl">
                           🎙️
                       </Button>
                       <Button onClick={() => setSelectedLanguage('fa-IR')} variant={selectedLanguage === 'fa-IR' ? 'secondary' : 'ghost'} className="rounded-full h-12">FA</Button>
@@ -310,13 +310,13 @@ const WhisperWriterPage: NextPage = () => {
               )}
 
               {isRecording && (
-                <Button onClick={recordingState === 'recording' ? handlePauseRecording : handleResumeRecording} size="icon" className="w-32 h-32 rounded-full bg-red-500/80 shadow-lg hover:bg-red-500/70">
+                <Button onClick={recordingState === 'recording' ? handlePauseRecording : handleResumeRecording} size="icon" className="w-32 h-32 rounded-full bg-red-500/80 shadow-lg">
                   {recordingState === 'recording' ? <Pause className="h-16 w-16" /> : <span className="text-6xl">🎙️</span>}
                 </Button>
               )}
               
               {showCancelAndStop && (
-                <Button onClick={handleStopRecording} size="icon" variant="secondary" className="w-16 h-16 rounded-full bg-green-500/80 hover:bg-green-500/80">
+                <Button onClick={handleStopRecording} size="icon" variant="secondary" className="w-16 h-16 rounded-full bg-green-500/80">
                     <StopCircle className="h-8 w-8" />
                 </Button>
               )}
@@ -330,7 +330,7 @@ const WhisperWriterPage: NextPage = () => {
           <div className="absolute top-0 left-0 h-48 w-full flex-shrink-0 bg-gradient-to-b from-[var(--bg)] to-transparent z-10 pointer-events-none" />
           
           {/* Text Areas & Controls */}
-          <div className="w-full max-w-lg space-y-6 flex flex-col items-center z-0 -mt-20">
+          <div className="w-full max-w-lg space-y-6 flex flex-col items-center z-0 pt-20">
             
             <div className="glossy-card">
               <div className="glossy-badge"><span className="dot"></span> Transcription (Editable)</div>
@@ -429,5 +429,4 @@ const WhisperWriterPage: NextPage = () => {
 
 export default WhisperWriterPage;
 
-    
     
