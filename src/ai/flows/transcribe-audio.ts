@@ -43,7 +43,7 @@ The primary language of the audio is {{{language}}}. Please prioritize transcrip
 Audio: {{media url=audioDataUri}}
 
 Transcription:`,
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-1.5-pro-latest',
   config: {
     safetySettings: [
       {
