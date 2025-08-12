@@ -272,7 +272,7 @@ const WhisperWriterPage: NextPage = () => {
       </Head>
       <div className="flex flex-col h-screen w-screen overflow-hidden bg-background">
         {/* Header */}
-        <header className="fixed top-0 left-0 right-0 z-20 w-full h-40 flex flex-col justify-start items-center p-4">
+        <header className="fixed top-0 left-0 right-0 z-30 w-full h-40 flex flex-col justify-start items-center p-4">
           {/* Background Images */}
           {Object.entries(HEADER_IMAGES).map(([state, src]) => (
             <div
@@ -292,7 +292,7 @@ const WhisperWriterPage: NextPage = () => {
             <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[65px] w-auto" />
           </div>
           {/* Recording Controls - Moved into Header */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4 z-10">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4 z-20">
               {showCancelAndStop && (
                   <Button onClick={handleCancelRecording} size="icon" variant="destructive" className="w-16 h-16 rounded-full bg-red-900/80 hover:bg-red-900/80">
                       <Trash2 className="h-8 w-8" />
@@ -325,9 +325,12 @@ const WhisperWriterPage: NextPage = () => {
 
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-64 main-bg">
+        <main className="relative flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-64 main-bg">
+          {/* Shader layer */}
+          <div className="sticky top-0 h-32 w-full flex-shrink-0 bg-gradient-to-b from-[var(--bg)] to-transparent -mt-32 z-10" />
+          
           {/* Text Areas & Controls */}
-          <div className="w-full max-w-lg space-y-6 flex flex-col items-center">
+          <div className="w-full max-w-lg space-y-6 flex flex-col items-center -mt-32">
             
             <div className="glossy-card">
               <div className="glossy-badge"><span className="dot"></span> Transcription (Editable)</div>
@@ -425,7 +428,3 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
-
-    
-
-    
