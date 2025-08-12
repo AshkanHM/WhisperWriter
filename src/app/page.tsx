@@ -134,10 +134,10 @@ const WhisperWriterPage: NextPage = () => {
               const { start, end } = transcriptionCursorPositionRef.current;
               const newText = `${prev.substring(0, start)}${transcriptionResult.transcription}${prev.substring(end)}`;
               const newCursorPos = start + transcriptionResult.transcription.length;
-              transcriptionCursorPositionRef.current = { start: newCursorPos, end: newCursorPos };
               setTimeout(() => {
                 transcriptionTextareaRef.current?.focus();
                 transcriptionTextareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
+                transcriptionCursorPositionRef.current = { start: newCursorPos, end: newCursorPos };
               }, 0);
               return newText;
             });
@@ -343,7 +343,7 @@ const WhisperWriterPage: NextPage = () => {
                     <Textarea
                         id="formatted-text"
                         value={formattedText}
-                        readOnly
+                        onChange={(e) => setFormattedText(e.target.value)}
                         placeholder="Your formatted text will appear here..."
                         rows={6}
                         className="mt-1 shadow-inner text-sm bg-muted/30 border-primary/20 rounded-xl pr-12"
@@ -391,5 +391,3 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
-
-    
