@@ -285,7 +285,7 @@ const WhisperWriterPage: NextPage = () => {
                 <span>More Languages</span>
             </button>
            <div className="absolute top-4 right-4 z-10">
-            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[52px] w-auto" />
+            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[38px] w-auto" />
           </div>
           {/* Recording Controls - Moved into Header */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4 z-20">
@@ -398,7 +398,7 @@ const WhisperWriterPage: NextPage = () => {
       </div>
 
       <Dialog open={isLanguageModalOpen} onOpenChange={setLanguageModalOpen}>
-        <DialogContent className="sm:max-w-[425px] h-3/4 flex flex-col">
+        <DialogContent className="glossy-card !max-w-[425px] !w-full !p-4 !border !bg-white/5 !rounded-2xl h-3/4 flex flex-col">
           <DialogHeader>
             <DialogTitle>Select Language</DialogTitle>
             <DialogDescription>
