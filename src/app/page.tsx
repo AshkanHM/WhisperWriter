@@ -363,7 +363,7 @@ const WhisperWriterPage: NextPage = () => {
                         ))}
                     </SelectContent>
                 </Select>
-                 <button onClick={handleFormatText} className="btn-glossy" disabled={isLoading || !transcription}>
+                 <button onClick={handleFormatText} className="btn-glossy btn-glossy-ghost" disabled={isLoading || !transcription}>
                     {processingStage === 'formatting' ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Wand2 className="mr-2 h-5 w-5" />}
                     Format
                 </button>
@@ -391,7 +391,7 @@ const WhisperWriterPage: NextPage = () => {
                     </Button>
                 </div>
             </div>
-             <button onClick={resetState} className="btn-glossy btn-glossy-ghost" disabled={isLoading}>
+             <button onClick={resetState} className="btn-glossy" disabled={isLoading}>
                   Reset
             </button>
           </div>
