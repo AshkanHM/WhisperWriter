@@ -367,7 +367,13 @@ const WhisperWriterPage: NextPage = () => {
             </div>
             
             <div className="glossy-card">
-                <div className="glossy-badge"><span className="dot"></span> AI-Enhanced Text</div>
+                <div className="glossy-badge">
+                  <span className={cn(
+                      "dot",
+                      (processingStage === 'success' && formattedText) && "bg-green-500 shadow-[0_0_14px_#22c55e]"
+                    )}>
+                  </span> AI-Enhanced Text
+                </div>
                 <div className="relative">
                     <textarea
                         id="formatted-text"
@@ -419,3 +425,5 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
+
+    
