@@ -80,11 +80,12 @@ const WhisperWriterPage: NextPage = () => {
     setSelectedLanguage(DEFAULT_LANGUAGE);
   }, []);
 
-  const handleCancelRecording = () => {
+ const handleCancelRecording = () => {
     if (mediaRecorderRef.current) {
         isCancelledRef.current = true;
+        // Directly stop tracks to avoid onstop event firing with valid data
         mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current.stop(); // This will now fire onstop, but we'll check the flag
     }
     // Only reset recording-related state, not the text
     setRecordingState('idle');
@@ -117,8 +118,11 @@ const WhisperWriterPage: NextPage = () => {
         if (audioBlob.size === 0) {
             console.log("No audio data recorded.");
             stream.getTracks().forEach(track => track.stop());
+            setRecordingState('idle'); 
             return;
         }
+
+        setRecordingState('stopped');
 
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
@@ -132,8 +136,10 @@ const WhisperWriterPage: NextPage = () => {
             });
              setTranscription(prev => {
               const { start, end } = transcriptionCursorPositionRef.current;
-              const newText = `${prev.substring(0, start)}${transcriptionResult.transcription}${prev.substring(end)}`;
-              const newCursorPos = start + transcriptionResult.transcription.length;
+              // Add a space if inserting between existing text
+              const separator = prev.length > 0 && start > 0 ? ' ' : '';
+              const newText = `${prev.substring(0, start)}${separator}${transcriptionResult.transcription}${prev.substring(end)}`;
+              const newCursorPos = start + transcriptionResult.transcription.length + separator.length;
               setTimeout(() => {
                 transcriptionTextareaRef.current?.focus();
                 transcriptionTextareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
@@ -177,7 +183,6 @@ const WhisperWriterPage: NextPage = () => {
   const handleStopRecording = () => {
     if (mediaRecorderRef.current && (recordingState === 'recording' || recordingState === 'paused')) {
       mediaRecorderRef.current.stop();
-      setRecordingState('stopped');
     }
   };
 
@@ -251,17 +256,13 @@ const WhisperWriterPage: NextPage = () => {
       </Head>
       <div className="flex flex-col h-screen w-screen overflow-hidden bg-background">
         {/* Header */}
-        <header className={cn("relative w-full h-48 transition-colors duration-500 flex flex-col justify-center items-center p-4", headerBgClass())}>
+        <header className={cn("fixed top-0 left-0 right-0 z-20 w-full h-40 transition-colors duration-500 flex flex-col justify-center items-center p-4", headerBgClass())}>
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/50 opacity-50"></div>
           <div className="relative z-10 flex flex-col items-center text-center">
             <img src="/icons/app-icon.svg" alt="Whisper Writer Logo" className="h-16 w-16 mb-2" />
           </div>
-        </header>
-
-        {/* Main Content */}
-        <main className="flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto">
-          {/* Recording Controls */}
-          <div className="relative flex items-center justify-center space-x-4 my-4">
+          {/* Recording Controls - Moved into Header */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4">
               {showCancelAndStop && (
                   <Button onClick={handleCancelRecording} size="icon" variant="destructive" className="w-16 h-16 rounded-full bg-red-900/80 hover:bg-red-800">
                       <Trash2 className="h-8 w-8" />
@@ -274,7 +275,9 @@ const WhisperWriterPage: NextPage = () => {
                       <Button onClick={handleStartRecording} size="icon" className="w-24 h-24 rounded-full bg-rose-200/10 hover:bg-rose-200/20 shadow-lg">
                           <Mic className="h-10 w-10 text-primary-foreground" />
                       </Button>
-                      <Button onClick={() => setSelectedLanguage('fa-IR')} variant={selectedLanguage === 'fa-IR' ? 'secondary' : 'ghost'} className="rounded-full h-12">FA</Button>
+                       <Button onClick={() => setLanguageModalOpen(true)} variant="ghost" size="icon" className="rounded-full h-12 w-12">
+                          <Languages className="h-6 w-6" />
+                      </Button>
                   </>
               )}
 
@@ -290,12 +293,14 @@ const WhisperWriterPage: NextPage = () => {
                 </Button>
               )}
           </div>
-          {!(isRecording || showCancelAndStop) && (
-             <Button onClick={() => setLanguageModalOpen(true)} variant="ghost" size="sm">
-                <Languages className="mr-2 h-4 w-4" />
-                {showCustomLanguage ? moreLanguagesButtonLabel : 'More Languages'}
-              </Button>
-          )}
+        </header>
+
+
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-52">
+           {!(isRecording || showCancelAndStop) && (
+              <Button onClick={() => setSelectedLanguage('fa-IR')} variant={selectedLanguage === 'fa-IR' ? 'secondary' : 'ghost'} className="rounded-full h-12 -mt-40">FA</Button>
+           )}
 
           {/* Text Areas & Controls */}
           <div className="w-full max-w-md space-y-4">
@@ -391,3 +396,5 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
+
+    
