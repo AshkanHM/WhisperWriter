@@ -241,9 +241,9 @@ const WhisperWriterPage: NextPage = () => {
   };
   
   const getSelectedLanguageLabel = () => {
-      const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
-      if (['en-US', 'fa-IR'].includes(selectedLanguage)) return 'More Languages';
-      return selectedLang ? selectedLang.label : 'More Languages';
+    if (['en-US', 'fa-IR'].includes(selectedLanguage)) return 'More Languages';
+    const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
+    return selectedLang ? selectedLang.label : 'More Languages';
   };
 
   const moreLanguagesButtonLabel = getSelectedLanguageLabel();
@@ -256,7 +256,18 @@ const WhisperWriterPage: NextPage = () => {
       </Head>
       <div className="flex flex-col h-screen w-screen overflow-hidden bg-background">
         {/* Header */}
-        <header className={cn("fixed top-0 left-0 right-0 z-20 w-full h-40 transition-colors duration-500 flex flex-col justify-start items-center p-4", headerBgClass())}>
+        <header 
+            className={cn("fixed top-0 left-0 right-0 z-20 w-full h-40 transition-colors duration-500 flex flex-col justify-start items-center p-4", headerBgClass())}
+            style={{
+                backgroundImage: `
+                    radial-gradient(circle at 50% 100%, transparent 0, transparent 24%, hsl(var(--primary) / 0.1) 24%, hsl(var(--primary) / 0.1) 32%, transparent 32%),
+                    radial-gradient(circle at 50% 100%, transparent 0, transparent 42%, hsl(var(--primary) / 0.1) 42%, hsl(var(--primary) / 0.1) 50%, transparent 50%),
+                    radial-gradient(circle at 50% 100%, transparent 0, transparent 65%, hsl(var(--primary) / 0.1) 65%, hsl(var(--primary) / 0.1) 73%, transparent 73%)
+                `,
+                backgroundSize: '100% 100%',
+                backgroundRepeat: 'no-repeat',
+            }}
+        >
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/50 opacity-50"></div>
            <Button onClick={() => setLanguageModalOpen(true)} variant={'ghost'} size="icon" className="absolute top-4 left-4 rounded-full h-12 w-auto px-4">
               {moreLanguagesButtonLabel === 'More Languages' ? <Languages className="h-6 w-6" /> : <span className="text-sm">{moreLanguagesButtonLabel}</span>}
