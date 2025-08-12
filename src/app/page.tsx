@@ -26,7 +26,6 @@ import {useToast} from '@/hooks/use-toast';
 import {transcribeAudio} from '@/ai/flows/transcribe-audio';
 import {formatText} from '@/ai/flows/format-text';
 import {
-  Mic,
   Pause,
   StopCircle,
   Copy,
@@ -34,7 +33,6 @@ import {
   Wand2,
   Languages,
   Check,
-  X,
   Trash2,
 } from 'lucide-react';
 import {
@@ -42,7 +40,6 @@ import {
   FORMATTING_STYLES,
   DEFAULT_LANGUAGE,
   DEFAULT_FORMATTING_STYLE,
-  type SelectOption,
 } from '@/lib/whisper-writer-config';
 import {cn} from '@/lib/utils';
 
@@ -292,7 +289,7 @@ const WhisperWriterPage: NextPage = () => {
               {moreLanguagesButtonLabel === 'More Languages' ? <Languages className="h-6 w-6" /> : <span className="text-sm">{moreLanguagesButtonLabel}</span>}
           </Button>
           <div className="relative z-10 flex flex-col items-center text-center -mt-2">
-            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[72px] w-auto" />
+            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[65px] w-auto" />
           </div>
           {/* Recording Controls - Moved into Header */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4 z-10">
@@ -328,12 +325,13 @@ const WhisperWriterPage: NextPage = () => {
 
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-56">
+        <main className="flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-56 main-bg">
           {/* Text Areas & Controls */}
-          <div className="w-full max-w-md space-y-4">
-            <div className="relative">
-              <Label htmlFor="transcription-text" className="text-xs font-medium text-muted-foreground">Transcription (Editable)</Label>
-              <Textarea
+          <div className="w-full max-w-lg space-y-6 flex flex-col items-center">
+            
+            <div className="glossy-card">
+              <div className="glossy-badge"><span className="dot"></span> Transcription (Editable)</div>
+              <textarea
                 id="transcription-text"
                 ref={transcriptionTextareaRef}
                 value={transcription}
@@ -344,15 +342,14 @@ const WhisperWriterPage: NextPage = () => {
                   processingStage === 'transcribing' ? "Transcribing..." : 
                   "Transcribed text will appear here."
                 }
-                rows={5}
-                className="mt-1 shadow-inner text-sm bg-muted/30 border-primary/20 rounded-xl"
+                className="glossy-textbox"
                 disabled={isRecording || isLoading}
               />
             </div>
             
-            <div className="flex flex-col space-y-2">
+            <div className="w-full max-w-lg flex flex-col space-y-2">
                 <Select value={selectedStyle} onValueChange={setSelectedStyle} disabled={isLoading || !transcription}>
-                    <SelectTrigger className="w-full h-12 text-sm rounded-lg bg-muted/30 border-primary/20">
+                    <SelectTrigger className="w-full h-12 text-sm rounded-lg bg-black/20 border-white/20">
                         <SelectValue placeholder="Select style" />
                     </SelectTrigger>
                     <SelectContent>
@@ -363,22 +360,21 @@ const WhisperWriterPage: NextPage = () => {
                         ))}
                     </SelectContent>
                 </Select>
-                 <Button onClick={handleFormatText} className="w-full h-12 text-base font-bold rounded-lg" disabled={isLoading || !transcription}>
+                 <button onClick={handleFormatText} className="btn-glossy" disabled={isLoading || !transcription}>
                     {processingStage === 'formatting' ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Wand2 className="mr-2 h-5 w-5" />}
                     Format
-                </Button>
+                </button>
             </div>
             
-            <div className="relative">
-                <Label htmlFor="formatted-text" className="text-xs font-medium text-muted-foreground">AI-Enhanced Text</Label>
+            <div className="glossy-card">
+                <div className="glossy-badge"><span className="dot"></span> AI-Enhanced Text</div>
                 <div className="relative">
-                    <Textarea
+                    <textarea
                         id="formatted-text"
                         value={formattedText}
                         onChange={(e) => setFormattedText(e.target.value)}
                         placeholder="Your formatted text will appear here..."
-                        rows={6}
-                        className="mt-1 shadow-inner text-sm bg-muted/30 border-primary/20 rounded-xl pr-12"
+                        className="glossy-textbox pr-12"
                         disabled={isLoading}
                     />
                     <Button onClick={() => handleCopyToClipboard(formattedText)} size="icon" variant="ghost" className="absolute top-2 right-2 h-8 w-8" disabled={!formattedText}>
@@ -386,9 +382,9 @@ const WhisperWriterPage: NextPage = () => {
                     </Button>
                 </div>
             </div>
-             <Button onClick={resetState} variant="outline" className="w-full h-12 text-base rounded-lg border-primary/30" disabled={isLoading}>
+             <button onClick={resetState} className="btn-glossy btn-glossy-ghost" disabled={isLoading}>
                   Reset
-            </Button>
+            </button>
           </div>
         </main>
       </div>
