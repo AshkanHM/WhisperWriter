@@ -250,9 +250,12 @@ const WhisperWriterPage: NextPage = () => {
     return 'neutral';
   };
   
-  const getSelectedLanguageLabel = () => {
-      const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
-      return selectedLang ? selectedLang.label : 'More Languages';
+  const getLanguageButtonLabel = () => {
+    if (selectedLanguage === 'en-US' || selectedLanguage === 'fa-IR') {
+      return 'More Languages';
+    }
+    const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
+    return selectedLang ? selectedLang.label : 'More Languages';
   };
 
   return (
@@ -282,7 +285,7 @@ const WhisperWriterPage: NextPage = () => {
 
            <button onClick={() => setLanguageModalOpen(true)} className="glossy-badge absolute top-4 left-4 z-10 !mb-0">
                 <Languages className="h-5 w-5" />
-                <span>More Languages</span>
+                <span>{getLanguageButtonLabel()}</span>
             </button>
            <div className="absolute top-4 right-4 z-10">
             <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[38px] w-auto" />
