@@ -289,7 +289,7 @@ const WhisperWriterPage: NextPage = () => {
               {moreLanguagesButtonLabel === 'More Languages' ? <Languages className="h-6 w-6" /> : <span className="text-sm">{moreLanguagesButtonLabel}</span>}
           </Button>
           <div className="relative z-10 flex flex-col items-center text-center -mt-2">
-            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[65px] w-auto" />
+            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[58px] w-auto" />
           </div>
           {/* Recording Controls - Moved into Header */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4 z-20">
@@ -327,10 +327,10 @@ const WhisperWriterPage: NextPage = () => {
         {/* Main Content */}
         <main className="relative flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-48 main-bg">
           {/* Shader layer */}
-          <div className="sticky top-0 h-32 w-full flex-shrink-0 bg-gradient-to-b from-[var(--bg)] to-transparent -mt-48 z-10 pointer-events-none" />
+          <div className="absolute top-0 left-0 h-48 w-full flex-shrink-0 bg-gradient-to-b from-[var(--bg)] to-transparent z-10 pointer-events-none" />
           
           {/* Text Areas & Controls */}
-          <div className="w-full max-w-lg space-y-6 flex flex-col items-center -mt-20">
+          <div className="w-full max-w-lg space-y-6 flex flex-col items-center z-0 -mt-20">
             
             <div className="glossy-card">
               <div className="glossy-badge"><span className="dot"></span> Transcription (Editable)</div>
@@ -429,4 +429,5 @@ const WhisperWriterPage: NextPage = () => {
 
 export default WhisperWriterPage;
 
+    
     
