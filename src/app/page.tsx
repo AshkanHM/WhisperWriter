@@ -85,13 +85,18 @@ const WhisperWriterPage: NextPage = () => {
         isCancelledRef.current = true;
         // Directly stop tracks to avoid onstop event firing with valid data
         mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-        mediaRecorderRef.current.stop(); // This will now fire onstop, but we'll check the flag
+        try {
+            if (mediaRecorderRef.current.state !== 'inactive') {
+                mediaRecorderRef.current.stop();
+            }
+        } catch (e) {
+            console.error("Error stopping media recorder:", e)
+        }
     }
     // Only reset recording-related state, not the text
     setRecordingState('idle');
     setProcessingStage('idle');
     audioChunksRef.current = [];
-    mediaRecorderRef.current = null;
   };
 
   const handleStartRecording = async () => {
@@ -108,16 +113,16 @@ const WhisperWriterPage: NextPage = () => {
       };
 
       mediaRecorderRef.current.onstop = async () => {
+        stream.getTracks().forEach(track => track.stop());
         if (isCancelledRef.current) {
-            stream.getTracks().forEach(track => track.stop());
             console.log("Recording cancelled, transcription skipped.");
+            isCancelledRef.current = false; // Reset for next recording
             return;
         }
         
         const audioBlob = new Blob(audioChunksRef.current, {type: mediaRecorderRef.current?.mimeType || 'audio/webm'});
         if (audioBlob.size === 0) {
             console.log("No audio data recorded.");
-            stream.getTracks().forEach(track => track.stop());
             setRecordingState('idle'); 
             return;
         }
@@ -136,8 +141,8 @@ const WhisperWriterPage: NextPage = () => {
             });
              setTranscription(prev => {
               const { start, end } = transcriptionCursorPositionRef.current;
-              // Add a space if inserting between existing text
-              const separator = prev.length > 0 && start > 0 ? ' ' : '';
+              // Add a space if inserting between existing text and not at the beginning
+              const separator = prev.length > 0 && start > 0 && prev[start - 1] !== ' ' ? ' ' : '';
               const newText = `${prev.substring(0, start)}${separator}${transcriptionResult.transcription}${prev.substring(end)}`;
               const newCursorPos = start + transcriptionResult.transcription.length + separator.length;
               setTimeout(() => {
@@ -154,7 +159,6 @@ const WhisperWriterPage: NextPage = () => {
             toast({title: 'Transcription Failed', description: (error as Error).message, variant: 'destructive'});
           }
         };
-        stream.getTracks().forEach(track => track.stop());
       };
 
       mediaRecorderRef.current.start();
@@ -241,7 +245,7 @@ const WhisperWriterPage: NextPage = () => {
   };
   
   const getSelectedLanguageLabel = () => {
-    if (['en-US', 'fa-IR'].includes(selectedLanguage)) return 'More Languages';
+    if (selectedLanguage === DEFAULT_LANGUAGE || selectedLanguage === 'fa-IR') return 'More Languages';
     const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
     return selectedLang ? selectedLang.label : 'More Languages';
   };
@@ -273,8 +277,7 @@ const WhisperWriterPage: NextPage = () => {
               {moreLanguagesButtonLabel === 'More Languages' ? <Languages className="h-6 w-6" /> : <span className="text-sm">{moreLanguagesButtonLabel}</span>}
           </Button>
           <div className="relative z-10 flex flex-col items-center text-center mt-2">
-            <img src="/icons/WW-Logo.webp" alt="Whisper Writer Logo" className="h-8 w-auto" />
-            <img src="/icons/WW-Logo-Type.webp" alt="Whisper Writer Logotype" className="h-3 w-auto mt-1" />
+            <img src="/Images/WW_Logo.png" alt="Whisper Writer Logo" className="h-12 w-auto mt-1" />
           </div>
           {/* Recording Controls - Moved into Header */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4">
@@ -405,6 +408,3 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
-
-    
-    
