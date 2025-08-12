@@ -80,7 +80,7 @@ If 'Requested Style' is 'Formal Report Snippet':
 For any other 'Requested Style' not explicitly detailed above, please interpret '{{{style}}}' broadly and rewrite the text to fit its typical conventions, always maintaining the 'Original Language'.
 
 Rewrite the text now.`,
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-1.5-pro-latest',
   config: {
     safetySettings: [
       {
