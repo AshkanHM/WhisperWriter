@@ -289,7 +289,7 @@ const WhisperWriterPage: NextPage = () => {
               {moreLanguagesButtonLabel === 'More Languages' ? <Languages className="h-6 w-6" /> : <span className="text-sm">{moreLanguagesButtonLabel}</span>}
           </Button>
           <div className="relative z-10 flex flex-col items-center text-center -mt-2">
-            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[52px] w-auto" />
+            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[47px] w-auto" />
           </div>
           {/* Recording Controls - Moved into Header */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4 z-20">
@@ -428,5 +428,7 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
+
+    
 
     
