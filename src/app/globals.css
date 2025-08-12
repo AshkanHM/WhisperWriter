@@ -123,6 +123,8 @@
     background:
       radial-gradient(80vw 80vw at 10% -10%, rgba(124,92,255,0.18), transparent 50%),
       radial-gradient(60vw 60vw at 110% 10%, rgba(124,92,255,0.10), transparent 55%),
+      radial-gradient(70vw 70vw at 50% 50%, rgba(124,92,255,0.12), transparent 60%),
+      radial-gradient(80vw 80vw at 90% 110%, rgba(124,92,255,0.15), transparent 50%),
       linear-gradient(180deg, #0B0B12 0%, #0A0A10 100%);
   }
 
