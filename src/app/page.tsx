@@ -241,8 +241,11 @@ const WhisperWriterPage: NextPage = () => {
   };
   
   const getSelectedLanguageLabel = () => {
-      const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
-      return selectedLang ? selectedLang.label : 'More Languages';
+    if (!['en-US', 'fa-IR'].includes(selectedLanguage)) {
+        const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
+        return selectedLang ? selectedLang.label : 'More Languages';
+    }
+    return 'More Languages';
   };
 
   const moreLanguagesButtonLabel = getSelectedLanguageLabel();
@@ -258,6 +261,9 @@ const WhisperWriterPage: NextPage = () => {
         {/* Header */}
         <header className={cn("fixed top-0 left-0 right-0 z-20 w-full h-40 transition-colors duration-500 flex flex-col justify-center items-center p-4", headerBgClass())}>
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/50 opacity-50"></div>
+           <Button onClick={() => setLanguageModalOpen(true)} variant={showCustomLanguage ? 'secondary' : 'ghost'} size="icon" className="absolute top-4 left-4 rounded-full h-12 w-auto px-4">
+              {showCustomLanguage ? <span className="text-sm">{moreLanguagesButtonLabel}</span> : <Languages className="h-6 w-6" />}
+          </Button>
           <div className="relative z-10 flex flex-col items-center text-center">
             <img src="/icons/app-icon.svg" alt="Whisper Writer Logo" className="h-16 w-16 mb-2" />
           </div>
@@ -275,9 +281,7 @@ const WhisperWriterPage: NextPage = () => {
                       <Button onClick={handleStartRecording} size="icon" className="w-24 h-24 rounded-full bg-rose-200/10 hover:bg-rose-200/20 shadow-lg">
                           <Mic className="h-10 w-10 text-primary-foreground" />
                       </Button>
-                       <Button onClick={() => setLanguageModalOpen(true)} variant="ghost" size="icon" className="rounded-full h-12 w-12">
-                          <Languages className="h-6 w-6" />
-                      </Button>
+                      <Button onClick={() => setSelectedLanguage('fa-IR')} variant={selectedLanguage === 'fa-IR' ? 'secondary' : 'ghost'} className="rounded-full h-12">FA</Button>
                   </>
               )}
 
@@ -297,11 +301,7 @@ const WhisperWriterPage: NextPage = () => {
 
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-52">
-           {!(isRecording || showCancelAndStop) && (
-              <Button onClick={() => setSelectedLanguage('fa-IR')} variant={selectedLanguage === 'fa-IR' ? 'secondary' : 'ghost'} className="rounded-full h-12 -mt-40">FA</Button>
-           )}
-
+        <main className="flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-56">
           {/* Text Areas & Controls */}
           <div className="w-full max-w-md space-y-4">
             <div className="relative">
@@ -396,5 +396,3 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
-
-    
