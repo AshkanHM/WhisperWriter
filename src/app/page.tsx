@@ -323,7 +323,7 @@ const WhisperWriterPage: NextPage = () => {
         <div className="absolute top-40 left-0 h-48 w-full flex-shrink-0 bg-gradient-to-b from-[var(--bg)] to-transparent z-10 pointer-events-none" />
 
         {/* Main Content */}
-        <main className="relative flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-56 main-bg z-0">
+        <main className="relative flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-60 main-bg z-0">
           
           {/* Text Areas & Controls */}
           <div className="w-full max-w-lg space-y-6 flex flex-col items-center z-0">
