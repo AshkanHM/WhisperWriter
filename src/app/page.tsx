@@ -77,22 +77,26 @@ const WhisperWriterPage: NextPage = () => {
     setTranscription('');
     setFormattedText('');
     setSelectedStyle(DEFAULT_FORMATTING_STYLE);
+    setSelectedLanguage(DEFAULT_LANGUAGE);
   }, []);
 
   const handleCancelRecording = () => {
     if (mediaRecorderRef.current) {
-        isCancelledRef.current = true; // Set cancellation flag
-        // Manually stop tracks to prevent onstop from having a valid blob
+        isCancelledRef.current = true;
         mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-        mediaRecorderRef.current.stop(); // This will trigger onstop, but our flag will prevent transcription
+        mediaRecorderRef.current.stop();
     }
-    resetState();
+    // Only reset recording-related state, not the text
+    setRecordingState('idle');
+    setProcessingStage('idle');
+    audioChunksRef.current = [];
+    mediaRecorderRef.current = null;
   };
 
   const handleStartRecording = async () => {
     if (recordingState === 'recording') return;
     setProcessingStage('idle');
-    isCancelledRef.current = false; // Reset cancellation flag
+    isCancelledRef.current = false; 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({audio: true});
       mediaRecorderRef.current = new MediaRecorder(stream);
@@ -103,7 +107,6 @@ const WhisperWriterPage: NextPage = () => {
       };
 
       mediaRecorderRef.current.onstop = async () => {
-        // Only proceed if not cancelled
         if (isCancelledRef.current) {
             stream.getTracks().forEach(track => track.stop());
             console.log("Recording cancelled, transcription skipped.");
@@ -127,14 +130,11 @@ const WhisperWriterPage: NextPage = () => {
               audioDataUri: base64Audio,
               language: selectedLanguage,
             });
-            // Insert new transcription at the last known cursor position
              setTranscription(prev => {
               const { start, end } = transcriptionCursorPositionRef.current;
               const newText = `${prev.substring(0, start)}${transcriptionResult.transcription}${prev.substring(end)}`;
-              // We need to update the cursor position to be at the end of the inserted text
               const newCursorPos = start + transcriptionResult.transcription.length;
               transcriptionCursorPositionRef.current = { start: newCursorPos, end: newCursorPos };
-              // Use a timeout to focus and set selection after the state update has rendered
               setTimeout(() => {
                 transcriptionTextareaRef.current?.focus();
                 transcriptionTextareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
@@ -235,7 +235,12 @@ const WhisperWriterPage: NextPage = () => {
     return 'bg-[hsl(var(--header-idle-bg))]';
   };
   
-  const moreLanguagesButtonLabel = LANGUAGES.find(lang => lang.value === selectedLanguage)?.label || 'More Languages';
+  const getSelectedLanguageLabel = () => {
+      const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
+      return selectedLang ? selectedLang.label : 'More Languages';
+  };
+
+  const moreLanguagesButtonLabel = getSelectedLanguageLabel();
   const showCustomLanguage = !['en-US', 'fa-IR'].includes(selectedLanguage);
 
 
@@ -265,11 +270,11 @@ const WhisperWriterPage: NextPage = () => {
 
               {(recordingState === 'idle' || recordingState === 'stopped') && (
                   <>
-                      <Button onClick={() => handleLanguageSelect('en-US')} variant={selectedLanguage === 'en-US' ? 'secondary' : 'ghost'} className="rounded-full h-12">EN</Button>
+                      <Button onClick={() => setSelectedLanguage('en-US')} variant={selectedLanguage === 'en-US' ? 'secondary' : 'ghost'} className="rounded-full h-12">EN</Button>
                       <Button onClick={handleStartRecording} size="icon" className="w-24 h-24 rounded-full bg-rose-200/10 hover:bg-rose-200/20 shadow-lg">
                           <Mic className="h-10 w-10 text-primary-foreground" />
                       </Button>
-                      <Button onClick={() => handleLanguageSelect('fa-IR')} variant={selectedLanguage === 'fa-IR' ? 'secondary' : 'ghost'} className="rounded-full h-12">FA</Button>
+                      <Button onClick={() => setSelectedLanguage('fa-IR')} variant={selectedLanguage === 'fa-IR' ? 'secondary' : 'ghost'} className="rounded-full h-12">FA</Button>
                   </>
               )}
 
@@ -386,7 +391,5 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
-
-    
 
     
