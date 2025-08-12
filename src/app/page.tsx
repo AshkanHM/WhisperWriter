@@ -62,6 +62,8 @@ const WhisperWriterPage: NextPage = () => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const isCancelledRef = useRef<boolean>(false);
+  const transcriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const transcriptionCursorPositionRef = useRef<{ start: number, end: number }>({ start: 0, end: 0 });
   const {toast} = useToast();
 
   const resetState = useCallback(() => {
@@ -125,8 +127,20 @@ const WhisperWriterPage: NextPage = () => {
               audioDataUri: base64Audio,
               language: selectedLanguage,
             });
-            // Append new transcription to the existing one
-            setTranscription(prev => prev ? `${prev} ${transcriptionResult.transcription}` : transcriptionResult.transcription);
+            // Insert new transcription at the last known cursor position
+             setTranscription(prev => {
+              const { start, end } = transcriptionCursorPositionRef.current;
+              const newText = `${prev.substring(0, start)}${transcriptionResult.transcription}${prev.substring(end)}`;
+              // We need to update the cursor position to be at the end of the inserted text
+              const newCursorPos = start + transcriptionResult.transcription.length;
+              transcriptionCursorPositionRef.current = { start: newCursorPos, end: newCursorPos };
+              // Use a timeout to focus and set selection after the state update has rendered
+              setTimeout(() => {
+                transcriptionTextareaRef.current?.focus();
+                transcriptionTextareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
+              }, 0);
+              return newText;
+            });
             setProcessingStage('success');
           } catch (error) {
             console.error('Transcription error:', error);
@@ -200,6 +214,17 @@ const WhisperWriterPage: NextPage = () => {
     setLanguageModalOpen(false);
   };
 
+  const handleTranscriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setTranscription(e.target.value);
+    transcriptionCursorPositionRef.current = { start: e.target.selectionStart, end: e.target.selectionEnd };
+  };
+
+  const handleTranscriptionSelect = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+    const target = e.target as HTMLTextAreaElement;
+    transcriptionCursorPositionRef.current = { start: target.selectionStart, end: target.selectionEnd };
+  };
+
+
   const isLoading = processingStage === 'transcribing' || processingStage === 'formatting';
   const isRecording = recordingState === 'recording' || recordingState === 'paused';
   const showCancelAndStop = recordingState === 'recording' || recordingState === 'paused';
@@ -268,8 +293,10 @@ const WhisperWriterPage: NextPage = () => {
               <Label htmlFor="transcription-text" className="text-xs font-medium text-muted-foreground">Transcription (Editable)</Label>
               <Textarea
                 id="transcription-text"
+                ref={transcriptionTextareaRef}
                 value={transcription}
-                onChange={(e) => setTranscription(e.target.value)}
+                onChange={handleTranscriptionChange}
+                onSelect={handleTranscriptionSelect}
                 placeholder={
                   isRecording ? "Listening..." : 
                   processingStage === 'transcribing' ? "Transcribing..." : 
@@ -354,5 +381,7 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
+
+    
 
     
