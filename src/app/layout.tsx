@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Whisper Writer', // Updated title
-  description: 'Real-time transcription and AI-powered text formatting', // Description can remain or be updated if needed
+  title: 'Whisper Writer',
+  description: 'Real-time transcription and AI-powered text formatting',
   manifest: '/manifest.json',
 };
 
@@ -29,7 +29,7 @@ export default function RootLayout({
     <html lang="en" className="dark" suppressHydrationWarning={true}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
         {children}
-        <Toaster /> {/* Added Toaster component */}
+        <Toaster />
       </body>
     </html>
   );

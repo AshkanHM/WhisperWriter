@@ -13,6 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {Label} from '@/components/ui/label';
 import {useToast} from '@/hooks/use-toast';
 import {transcribeAudio} from '@/ai/flows/transcribe-audio';
@@ -20,14 +28,14 @@ import {formatText} from '@/ai/flows/format-text';
 import {
   Mic,
   Pause,
-  Square,
+  StopCircle,
   Copy,
   Loader2,
   Wand2,
   Languages,
-  CheckCircle,
-  AlertTriangle,
-  RefreshCw,
+  Check,
+  X,
+  Trash2,
 } from 'lucide-react';
 import {
   LANGUAGES,
@@ -36,8 +44,8 @@ import {
   DEFAULT_FORMATTING_STYLE,
   type SelectOption,
 } from '@/lib/whisper-writer-config';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import {cn} from '@/lib/utils';
+
 
 type RecordingState = 'idle' | 'recording' | 'paused' | 'stopped';
 type ProcessingStage = 'idle' | 'transcribing' | 'formatting' | 'error' | 'success';
@@ -49,36 +57,37 @@ const WhisperWriterPage: NextPage = () => {
   const [transcription, setTranscription] = useState<string>('');
   const [formattedText, setFormattedText] = useState<string>('');
   const [selectedStyle, setSelectedStyle] = useState<string>(DEFAULT_FORMATTING_STYLE);
-  const [statusMessage, setStatusMessage] = useState<string>('Ready to record.');
+  const [isLanguageModalOpen, setLanguageModalOpen] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const {toast} = useToast();
 
-  const HOTKEY = 'Alt+R';
-
-  const resetState = () => {
-    setRecordingState('idle');
-    setProcessingStage('idle');
-    setSelectedLanguage(DEFAULT_LANGUAGE);
-    setTranscription('');
-    setFormattedText('');
-    setSelectedStyle(DEFAULT_FORMATTING_STYLE);
-    setStatusMessage('Ready to record.');
+  const resetState = useCallback(() => {
     if (mediaRecorderRef.current?.stream) {
         mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
     }
     mediaRecorderRef.current = null;
     audioChunksRef.current = [];
+    setRecordingState('idle');
+    setProcessingStage('idle');
+    setTranscription('');
+    setFormattedText('');
+    setSelectedStyle(DEFAULT_FORMATTING_STYLE);
+  }, []);
+
+  const handleCancelRecording = () => {
+    if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    }
+    resetState();
   };
 
   const handleStartRecording = async () => {
     if (recordingState === 'recording') return;
-    // Reset relevant fields before starting a new recording
     setTranscription('');
     setFormattedText('');
     setProcessingStage('idle');
-    setStatusMessage('Initializing recording...');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({audio: true});
       mediaRecorderRef.current = new MediaRecorder(stream);
@@ -94,7 +103,6 @@ const WhisperWriterPage: NextPage = () => {
         reader.readAsDataURL(audioBlob);
         reader.onloadend = async () => {
           const base64Audio = reader.result as string;
-          setStatusMessage('Transcribing audio...');
           setProcessingStage('transcribing');
           try {
             const transcriptionResult = await transcribeAudio({
@@ -102,25 +110,20 @@ const WhisperWriterPage: NextPage = () => {
               language: selectedLanguage,
             });
             setTranscription(transcriptionResult.transcription);
-            setStatusMessage('Transcription complete. Edit if needed, then format.');
             setProcessingStage('success');
           } catch (error) {
             console.error('Transcription error:', error);
-            setStatusMessage('Error during transcription. Please try again.');
             setProcessingStage('error');
             toast({title: 'Transcription Failed', description: (error as Error).message, variant: 'destructive'});
           }
         };
-        // Clean up stream tracks
         stream.getTracks().forEach(track => track.stop());
       };
 
       mediaRecorderRef.current.start();
       setRecordingState('recording');
-      setStatusMessage(`Recording in ${LANGUAGES.find(l => l.value === selectedLanguage)?.label || 'selected language'}... Press ${HOTKEY} to stop.`);
     } catch (error) {
       console.error('Error starting recording:', error);
-      setStatusMessage('Failed to start recording. Check microphone permissions.');
       setProcessingStage('error');
       toast({title: 'Recording Error', description: 'Could not access microphone. Please check permissions.', variant: 'destructive'});
     }
@@ -130,7 +133,6 @@ const WhisperWriterPage: NextPage = () => {
     if (mediaRecorderRef.current && recordingState === 'recording') {
       mediaRecorderRef.current.pause();
       setRecordingState('paused');
-      setStatusMessage('Recording paused.');
     }
   };
 
@@ -138,47 +140,21 @@ const WhisperWriterPage: NextPage = () => {
     if (mediaRecorderRef.current && recordingState === 'paused') {
       mediaRecorderRef.current.resume();
       setRecordingState('recording');
-      setStatusMessage('Recording resumed...');
     }
   };
 
   const handleStopRecording = () => {
     if (mediaRecorderRef.current && (recordingState === 'recording' || recordingState === 'paused')) {
       mediaRecorderRef.current.stop();
-      setRecordingState('stopped'); // 'stopped' is a transient state before transcription begins
+      setRecordingState('stopped');
     }
   };
-
-  const toggleRecording = useCallback(() => {
-    if (recordingState === 'idle' || recordingState === 'stopped') {
-      handleStartRecording();
-    } else if (recordingState === 'recording') {
-      handleStopRecording(); 
-    } else if (recordingState === 'paused') {
-      handleResumeRecording();
-    }
-  }, [recordingState, selectedLanguage]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.altKey && event.key.toUpperCase() === 'R') {
-        event.preventDefault();
-        toggleRecording();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [toggleRecording]);
-
 
   const handleFormatText = async () => {
     if (!transcription) {
       toast({title: 'No Text to Format', description: 'Please record or type text into the transcription box first.', variant: 'default'});
       return;
     }
-    setStatusMessage('Formatting text...');
     setProcessingStage('formatting');
     try {
       const formatResult = await formatText({
@@ -187,179 +163,177 @@ const WhisperWriterPage: NextPage = () => {
         language: selectedLanguage,
       });
       setFormattedText(formatResult.formattedText);
-      setStatusMessage('Text formatting complete.');
       setProcessingStage('success');
     } catch (error) {
       console.error('Formatting error:', error);
-      setStatusMessage('Error during text formatting.');
       setProcessingStage('error');
       toast({title: 'Formatting Failed', description: (error as Error).message, variant: 'destructive'});
     }
   };
 
-  const handleCopyToClipboard = () => {
-    if (!formattedText) {
-      toast({title: 'Nothing to Copy', description: 'The formatted text box is empty.', variant: 'default'});
-      return;
-    }
-    navigator.clipboard.writeText(formattedText)
-      .then(() => {
-        toast({title: 'Copied to Clipboard!', description: 'The formatted text has been copied.'});
-        setStatusMessage('Formatted text copied to clipboard.');
-      })
-      .catch(err => {
-        console.error('Failed to copy text: ', err);
-        toast({title: 'Copy Failed', description: 'Could not copy text to clipboard.', variant: 'destructive'});
-        setStatusMessage('Failed to copy text.');
-      });
+  const handleCopyToClipboard = (textToCopy: string) => {
+    if (!textToCopy) return;
+    navigator.clipboard.writeText(textToCopy)
+      .then(() => toast({title: 'Copied to Clipboard!'}))
+      .catch(err => toast({title: 'Copy Failed', variant: 'destructive'}));
+  };
+  
+  const handleLanguageSelect = (langValue: string) => {
+    setSelectedLanguage(langValue);
+    setLanguageModalOpen(false);
   };
 
   const isLoading = processingStage === 'transcribing' || processingStage === 'formatting';
-  const isRecordingActive = recordingState === 'recording' || recordingState === 'paused';
+  const isRecording = recordingState === 'recording' || recordingState === 'paused';
+  const showCancelAndStop = recordingState === 'recording' || recordingState === 'paused';
+
+  const headerBgClass = () => {
+    if (isRecording) return 'bg-[hsl(var(--header-recording-bg))]';
+    if (processingStage === 'success') return 'bg-[hsl(var(--header-success-bg))]';
+    return 'bg-[hsl(var(--header-idle-bg))]';
+  };
 
   return (
     <>
       <Head>
-        <title>Whisper Writer - Real-time Transcription & Formatting</title>
+        <title>Whisper Writer - AI-Powered Transcription & Formatting</title>
       </Head>
-      <div className="min-h-screen flex flex-col items-center justify-center p-1 sm:p-2 bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
-        <Card className="w-full max-w-sm shadow-2xl">
-          <CardHeader className="text-center pb-2 pt-3">
-             <div className="flex items-center justify-center space-x-1.5 mb-1">
-                 <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M4,24C4,24 10,12,24,12C38,12 44,24,44,24C44,24 38,36,24,36C10,36 4,24,4,24Z" fill="none" stroke="currentColor" strokeWidth="4" strokeLinejoin="round"/>
-                  <path d="M24,29C26.7614,29,29,26.7614,29,24C29,21.2386,26.7614,19,24,19C21.2386,19,19,21.2386,19,24C19,26.7614,21.2386,29,24,29Z" fill="none" stroke="currentColor" strokeWidth="4" strokeLinejoin="round"/>
-                </svg>
-                <CardTitle className="text-lg font-bold">Whisper Writer</CardTitle>
-            </div>
-            <CardDescription className="text-xs">
-              AI-powered transcription & formatting. Press {HOTKEY} to start/stop.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2 p-3">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
-              <div className="md:col-span-1">
-                <Label htmlFor="language-select" className="flex items-center mb-0.5 text-xs">
-                  <Languages className="mr-1 h-3 w-3" /> Language
-                </Label>
-                <Select value={selectedLanguage} onValueChange={setSelectedLanguage} disabled={isRecordingActive || isLoading}>
-                  <SelectTrigger id="language-select" className="h-9 text-xs">
-                    <SelectValue placeholder="Select language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {LANGUAGES.map((lang) => (
-                      <SelectItem key={lang.value} value={lang.value} className="text-xs">
-                        {lang.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="md:col-span-2 flex space-x-1.5">
-                {recordingState === 'idle' || recordingState === 'stopped' ? (
-                  <Button onClick={handleStartRecording} className="w-full h-9 text-xs" disabled={isLoading}>
-                    <Mic className="mr-1.5 h-3 w-3" /> Record
-                  </Button>
-                ) : recordingState === 'recording' ? (
-                  <>
-                    <Button onClick={handlePauseRecording} variant="outline" className="w-full h-9 text-xs" disabled={isLoading}>
-                      <Pause className="mr-1.5 h-3 w-3" /> Pause
-                    </Button>
-                    <Button onClick={handleStopRecording} variant="destructive" className="w-full h-9 text-xs" disabled={isLoading}>
-                      <Square className="mr-1.5 h-3 w-3" /> Stop
-                    </Button>
-                  </>
-                ) : ( // Paused state
-                  <>
-                    <Button onClick={handleResumeRecording} className="w-full h-9 text-xs" disabled={isLoading}>
-                      <Mic className="mr-1.5 h-3 w-3" /> Resume
-                    </Button>
-                     <Button onClick={handleStopRecording} variant="destructive" className="w-full h-9 text-xs" disabled={isLoading}>
-                      <Square className="mr-1.5 h-3 w-3" /> Stop
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
+      <div className="flex flex-col h-screen w-screen overflow-hidden bg-background">
+        {/* Header */}
+        <header className={cn("relative w-full h-48 transition-colors duration-500 flex flex-col justify-center items-center p-4", headerBgClass())}>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/50 opacity-50"></div>
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <img src="/icons/app-icon.svg" alt="Whisper Writer Logo" className="h-16 w-16 mb-2" />
+          </div>
+        </header>
 
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto">
+          {/* Recording Controls */}
+          <div className="relative flex items-center justify-center space-x-4 my-4">
+              {showCancelAndStop && (
+                  <Button onClick={handleCancelRecording} size="icon" variant="destructive" className="w-16 h-16 rounded-full bg-red-900/80 hover:bg-red-800">
+                      <Trash2 className="h-8 w-8" />
+                  </Button>
+              )}
+
+              {recordingState === 'idle' && (
+                  <>
+                      <Button onClick={() => handleLanguageSelect('en-US')} variant={selectedLanguage === 'en-US' ? 'secondary' : 'ghost'} className="rounded-full h-12">EN</Button>
+                      <Button onClick={handleStartRecording} size="icon" className="w-24 h-24 rounded-full bg-rose-200/10 hover:bg-rose-200/20 shadow-lg">
+                          <Mic className="h-10 w-10 text-primary-foreground" />
+                      </Button>
+                      <Button onClick={() => handleLanguageSelect('fa-IR')} variant={selectedLanguage === 'fa-IR' ? 'secondary' : 'ghost'} className="rounded-full h-12">FA</Button>
+                  </>
+              )}
+
+              {isRecording && (
+                <Button onClick={recordingState === 'recording' ? handlePauseRecording : handleResumeRecording} size="icon" className="w-24 h-24 rounded-full bg-red-500/80 shadow-lg">
+                  {recordingState === 'recording' ? <Pause className="h-10 w-10" /> : <Mic className="h-10 w-10" />}
+                </Button>
+              )}
+              
+              {showCancelAndStop && (
+                <Button onClick={handleStopRecording} size="icon" variant="secondary" className="w-16 h-16 rounded-full bg-green-500/80 hover:bg-green-400">
+                    <StopCircle className="h-8 w-8" />
+                </Button>
+              )}
+          </div>
+          {!isRecording && (
+             <Button onClick={() => setLanguageModalOpen(true)} variant="ghost" size="sm">
+                <Languages className="mr-2 h-4 w-4" /> More Languages
+              </Button>
+          )}
+
+          {/* Text Areas & Controls */}
+          <div className="w-full max-w-md space-y-4">
             <div className="relative">
-              <Label htmlFor="transcription-text" className="text-xs font-medium">Transcription (Editable)</Label>
+              <Label htmlFor="transcription-text" className="text-xs font-medium text-muted-foreground">Transcription (Editable)</Label>
               <Textarea
                 id="transcription-text"
                 value={transcription}
                 onChange={(e) => setTranscription(e.target.value)}
                 placeholder={
-                  recordingState === 'recording' ? "Listening..." : 
-                  processingStage === 'transcribing' ? "Transcribing audio..." : 
-                  "Your transcribed text will appear here. You can edit it before formatting."
+                  isRecording ? "Listening..." : 
+                  processingStage === 'transcribing' ? "Transcribing..." : 
+                  "Transcribed text will appear here."
                 }
-                rows={4}
-                className="mt-0.5 shadow-inner text-sm"
-                disabled={isRecordingActive || isLoading}
+                rows={5}
+                className="mt-1 shadow-inner text-sm bg-muted/30 border-primary/20 rounded-xl"
+                disabled={isRecording || isLoading}
               />
             </div>
             
-            <Separator className="my-2"/>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end">
-              <div className="md:col-span-2">
-                <Label htmlFor="style-select" className="flex items-center mb-0.5 text-xs">
-                  <Wand2 className="mr-1 h-3 w-3" /> Formatting Style
-                </Label>
-                <Select value={selectedStyle} onValueChange={setSelectedStyle} disabled={isRecordingActive || isLoading || !transcription}>
-                  <SelectTrigger id="style-select" className="h-9 text-xs">
-                    <SelectValue placeholder="Select style" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FORMATTING_STYLES.map((style) => (
-                      <SelectItem key={style.value} value={style.value} className="text-xs">
-                        {style.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+            <div className="flex flex-col space-y-2">
+                <Select value={selectedStyle} onValueChange={setSelectedStyle} disabled={isLoading || !transcription}>
+                    <SelectTrigger className="w-full h-12 text-sm rounded-lg bg-muted/30 border-primary/20">
+                        <SelectValue placeholder="Select style" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {FORMATTING_STYLES.map((style) => (
+                        <SelectItem key={style.value} value={style.value} className="text-sm">
+                            {style.label}
+                        </SelectItem>
+                        ))}
+                    </SelectContent>
                 </Select>
-              </div>
-              <Button onClick={handleFormatText} className="w-full h-9 text-xs" disabled={isRecordingActive || isLoading || !transcription}>
-                {processingStage === 'formatting' ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Wand2 className="mr-1.5 h-3 w-3" />}
-                Format
-              </Button>
+                 <Button onClick={handleFormatText} className="w-full h-12 text-base font-bold rounded-lg" disabled={isLoading || !transcription}>
+                    {processingStage === 'formatting' ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Wand2 className="mr-2 h-5 w-5" />}
+                    Format
+                </Button>
             </div>
             
             <div className="relative">
-                <Label htmlFor="formatted-text" className="text-xs font-medium">AI-Enhanced Text</Label>
-                <Textarea
-                    id="formatted-text"
-                    value={formattedText}
-                    readOnly
-                    placeholder="Your formatted text will appear here..."
-                    rows={5}
-                    className="mt-0.5 shadow-inner text-sm bg-muted/50"
-                    disabled={isLoading}
-                />
+                <Label htmlFor="formatted-text" className="text-xs font-medium text-muted-foreground">AI-Enhanced Text</Label>
+                <div className="relative">
+                    <Textarea
+                        id="formatted-text"
+                        value={formattedText}
+                        readOnly
+                        placeholder="Your formatted text will appear here..."
+                        rows={6}
+                        className="mt-1 shadow-inner text-sm bg-muted/30 border-primary/20 rounded-xl pr-12"
+                        disabled={isLoading}
+                    />
+                    <Button onClick={() => handleCopyToClipboard(formattedText)} size="icon" variant="ghost" className="absolute top-2 right-2 h-8 w-8" disabled={!formattedText}>
+                        <Copy className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
-            
-            <div className="grid grid-cols-2 gap-2">
-                <Button onClick={handleCopyToClipboard} variant="outline" className="w-full h-9 text-xs" disabled={!formattedText || isLoading}>
-                  <Copy className="mr-1.5 h-3 w-3" /> Copy
-                </Button>
-                <Button onClick={resetState} variant="ghost" className="w-full h-9 text-xs" disabled={isLoading}>
-                  <RefreshCw className="mr-1.5 h-3 w-3" /> Reset
-                </Button>
-            </div>
-
-            <div className="text-xs text-muted-foreground p-2 rounded-md border border-dashed flex items-center justify-center min-h-[34px]">
-              {isLoading && <Loader2 className="h-3 w-3 animate-spin mr-1.5" />}
-              {processingStage === 'error' && <AlertTriangle className="h-3 w-3 text-destructive mr-1.5" />}
-              {processingStage === 'success' && (transcription || formattedText) && <CheckCircle className="h-3 w-3 text-green-500 mr-1.5" />}
-              <span className="text-center">{statusMessage}</span>
-            </div>
-          </CardContent>
-        </Card>
+             <Button onClick={resetState} variant="outline" className="w-full h-12 text-base rounded-lg border-primary/30" disabled={isLoading}>
+                  Reset
+            </Button>
+          </div>
+        </main>
       </div>
+
+      <Dialog open={isLanguageModalOpen} onOpenChange={setLanguageModalOpen}>
+        <DialogContent className="sm:max-w-[425px] h-3/4 flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Select Language</DialogTitle>
+            <DialogDescription>
+              Choose the language of your audio for the best transcription accuracy.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="flex-1">
+             <div className="flex flex-col space-y-1 pr-4">
+                {LANGUAGES.map((lang) => (
+                  <Button
+                    key={lang.value}
+                    variant={selectedLanguage === lang.value ? "secondary" : "ghost"}
+                    onClick={() => handleLanguageSelect(lang.value)}
+                    className="w-full justify-start"
+                  >
+                    <span className="flex-1 text-left">{lang.label}</span>
+                    {selectedLanguage === lang.value && <Check className="h-4 w-4" />}
+                  </Button>
+                ))}
+             </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
 
 export default WhisperWriterPage;
-
-    

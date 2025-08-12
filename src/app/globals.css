@@ -52,33 +52,38 @@
   }
 
   .dark {
-    --background: 220 20% 10%; /* Very dark, slightly desaturated blue-gray */
-    --foreground: 210 20% 90%; /* Light, slightly desaturated blue-gray (near #F5F5F5) */
+    --background: 222 47% 11%; /* Dark blue-black */
+    --foreground: 210 40% 98%; /* Light gray */
 
-    --card: 220 20% 13%;
-    --card-foreground: 210 20% 90%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 220 20% 8%; /* Darker for popovers */
-    --popover-foreground: 210 20% 90%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%; /* Vibrant blue for primary actions/highlights */
-    --primary-foreground: 210 40% 98%; /* Very light gray for text on primary blue buttons */
+    --primary: 262 88% 66%; /* Techy purple */
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 220 15% 20%;
-    --secondary-foreground: 210 20% 90%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 220 15% 18%;
-    --muted-foreground: 210 10% 60%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 220 15% 25%; /* Medium-dark blue-gray for subtle accents */
-    --accent-foreground: 210 20% 90%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 220 15% 22%; /* Slightly more visible border */
-    --input: 220 15% 18%; /* Darker input background */
-    --ring: 217 91% 65%; /* Slightly lighter blue for rings */
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 262 88% 66%;
+
+    /* Custom Header Status Colors */
+    --header-idle-bg: 258 69% 35%;
+    --header-recording-bg: 350 70% 35%;
+    --header-success-bg: 140 60% 30%;
     
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
@@ -103,6 +108,5 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* Removed explicit font-family to allow Geist from layout.tsx to take precedence */
   }
 }
