@@ -235,8 +235,8 @@ const WhisperWriterPage: NextPage = () => {
     return 'bg-[hsl(var(--header-idle-bg))]';
   };
   
-  const selectedLanguageLabel = LANGUAGES.find(lang => lang.value === selectedLanguage)?.label.split(' ')[0].toUpperCase().substring(0, 2);
-  const showLanguageBadge = !['EN', 'FA'].includes(selectedLanguageLabel || '');
+  const moreLanguagesButtonLabel = LANGUAGES.find(lang => lang.value === selectedLanguage)?.label || 'More Languages';
+  const showCustomLanguage = !['en-US', 'fa-IR'].includes(selectedLanguage);
 
 
   return (
@@ -288,7 +288,7 @@ const WhisperWriterPage: NextPage = () => {
           {!(isRecording || showCancelAndStop) && (
              <Button onClick={() => setLanguageModalOpen(true)} variant="ghost" size="sm">
                 <Languages className="mr-2 h-4 w-4" />
-                {showLanguageBadge ? selectedLanguageLabel : 'More Languages'}
+                {showCustomLanguage ? moreLanguagesButtonLabel : 'More Languages'}
               </Button>
           )}
 
@@ -366,7 +366,7 @@ const WhisperWriterPage: NextPage = () => {
           </DialogHeader>
           <ScrollArea className="flex-1">
              <div className="flex flex-col space-y-1 pr-4">
-                {LANGUAGES.map((lang) => (
+                {LANGUAGES.filter(lang => lang.value !== 'en-US' && lang.value !== 'fa-IR').map((lang) => (
                   <Button
                     key={lang.value}
                     variant={selectedLanguage === lang.value ? "secondary" : "ghost"}
@@ -386,5 +386,7 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
+
+    
 
     
