@@ -61,6 +61,7 @@ const WhisperWriterPage: NextPage = () => {
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const isCancelledRef = useRef<boolean>(false);
   const {toast} = useToast();
 
   const resetState = useCallback(() => {
@@ -78,7 +79,10 @@ const WhisperWriterPage: NextPage = () => {
 
   const handleCancelRecording = () => {
     if (mediaRecorderRef.current) {
+        isCancelledRef.current = true; // Set cancellation flag
+        // Manually stop tracks to prevent onstop from having a valid blob
         mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+        mediaRecorderRef.current.stop(); // This will trigger onstop, but our flag will prevent transcription
     }
     resetState();
   };
@@ -88,6 +92,7 @@ const WhisperWriterPage: NextPage = () => {
     setTranscription('');
     setFormattedText('');
     setProcessingStage('idle');
+    isCancelledRef.current = false; // Reset cancellation flag
     try {
       const stream = await navigator.mediaDevices.getUserMedia({audio: true});
       mediaRecorderRef.current = new MediaRecorder(stream);
@@ -98,7 +103,20 @@ const WhisperWriterPage: NextPage = () => {
       };
 
       mediaRecorderRef.current.onstop = async () => {
+        // Only proceed if not cancelled
+        if (isCancelledRef.current) {
+            stream.getTracks().forEach(track => track.stop());
+            console.log("Recording cancelled, transcription skipped.");
+            return;
+        }
+        
         const audioBlob = new Blob(audioChunksRef.current, {type: mediaRecorderRef.current?.mimeType || 'audio/webm'});
+        if (audioBlob.size === 0) {
+            console.log("No audio data recorded.");
+            stream.getTracks().forEach(track => track.stop());
+            return;
+        }
+
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
         reader.onloadend = async () => {
@@ -239,7 +257,7 @@ const WhisperWriterPage: NextPage = () => {
                 </Button>
               )}
           </div>
-          {!isRecording && (
+          {!(isRecording || showCancelAndStop) && (
              <Button onClick={() => setLanguageModalOpen(true)} variant="ghost" size="sm">
                 <Languages className="mr-2 h-4 w-4" /> More Languages
               </Button>
@@ -337,3 +355,5 @@ const WhisperWriterPage: NextPage = () => {
 };
 
 export default WhisperWriterPage;
+
+    
