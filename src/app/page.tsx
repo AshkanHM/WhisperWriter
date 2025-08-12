@@ -34,6 +34,7 @@ import {
   Languages,
   Check,
   Trash2,
+  RefreshCw,
 } from 'lucide-react';
 import {
   LANGUAGES,
@@ -391,9 +392,12 @@ const WhisperWriterPage: NextPage = () => {
                     </Button>
                 </div>
             </div>
-             <button onClick={resetState} className="btn-glossy" disabled={isLoading}>
-                  Reset
-            </button>
+            <div className="w-full max-w-lg">
+              <button onClick={resetState} className="btn-glossy w-full" disabled={isLoading}>
+                    <RefreshCw className="mr-2 h-5 w-5" />
+                    Reset
+              </button>
+            </div>
           </div>
         </main>
       </div>
