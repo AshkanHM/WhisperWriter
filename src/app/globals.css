@@ -720,8 +720,8 @@
   --glass-top: rgba(255,255,255,.08);
   --glass-bot: rgba(255,255,255,.03);
   --accent: #7C5CFF;
-  --accent-rec: #FF3B3B;
-  --accent-pause: #22D3EE;
+  --accent-rec: #ffffff;
+  --accent-pause: #ffffff;
   --text: #fff;
   --bg: #0B0B12;
 }
