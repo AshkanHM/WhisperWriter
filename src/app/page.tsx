@@ -173,7 +173,7 @@ const hasFormatted     = formattedText.trim().length   > 0;
             return;
         }
 
-        setRecordingState('stopped');
+        setRecordingState('idle');
 
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
@@ -247,6 +247,7 @@ transcriptionCursorPositionRef.current = { start: newCursorPos, end: newCursorPo
   const handleStopRecording = () => {
     if (mediaRecorderRef.current && (recordingState === 'recording' || recordingState === 'paused')) {
       mediaRecorderRef.current.stop();
+      setRecordingState('stopped');
     }
   };
 
@@ -676,11 +677,11 @@ transcriptionCursorPositionRef.current = { start: newCursorPos, end: newCursorPo
 .rec-btn:active { transform: translateY(0) scale(.98); }
 
 /* Idle glow */
-.rec-btn.idle { --ring: var(--accent); }
-.rec-btn.idle {
+.rec-btn.idle, .rec-btn.stopped { --ring: var(--accent); }
+.rec-btn.idle, .rec-btn.stopped {
   box-shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 24px 64px var(--shadow), 0 0 32px 0 rgba(124,92,255,.20);
 }
-.rec-btn.idle .icon-mic { opacity: 1; }
+.rec-btn.idle .icon-mic, .rec-btn.stopped .icon-mic { opacity: 1; }
 
 /* Recording state */
 .rec-btn.recording {
