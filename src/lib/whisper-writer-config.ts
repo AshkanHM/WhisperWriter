@@ -7,28 +7,37 @@ export interface SelectOption {
 export const LANGUAGES: SelectOption[] = [
   { value: 'en-US', label: 'English (US)' },
   { value: 'fa-IR', label: 'فارسی (ایران)' },
-  { value: 'tr-TR', label: 'Türkçe (Türkiye)' },
-  { value: 'es-ES', label: 'Español (España)' },
+  { value: 'fi-FI', label: 'Suomi (Suomi)' },             // Finland
   { value: 'fr-FR', label: 'Français (France)' },
   { value: 'de-DE', label: 'Deutsch (Deutschland)' },
-  { value: 'ja-JP', label: '日本語 (日本)' },
-  { value: 'pt-BR', label: 'Português (Brasil)' },
+  { value: 'es-ES', label: 'Español (España)' },
   { value: 'it-IT', label: 'Italiano (Italia)' },
-  { value: 'ru-RU', label: 'Русский (Россия)' },
+  { value: 'nl-NL', label: 'Nederlands (Nederland)' },    // Netherlands
+  { value: 'sv-SE', label: 'Svenska (Sverige)' },         // Sweden
+  { value: 'da-DK', label: 'Dansk (Danmark)' },           // Denmark
+  { value: 'no-NO', label: 'Norsk (Norge)' },             // Norway
+  { value: 'pl-PL', label: 'Polski (Polska)' },           // Poland
+  { value: 'cs-CZ', label: 'Čeština (Česká republika)' }, // Czech Republic
+  { value: 'pt-PT', label: 'Português (Portugal)' },
+  { value: 'el-GR', label: 'Ελληνικά (Ελλάδα)' },         // Greece
+  { value: 'ru-RU', label: 'Русский (Россия)' },          // moved up
+  { value: 'tr-TR', label: 'Türkçe (Türkiye)' },
+  // Non-European languages after this
+  { value: 'ja-JP', label: '日本語 (日本)' },
   { value: 'zh-CN', label: '中文 (中国大陆)' },
+  { value: 'pt-BR', label: 'Português (Brasil)' },
   { value: 'ar-SA', label: 'العربية (السعودية)' },
 ];
 
 export const FORMATTING_STYLES: SelectOption[] = [
-  { value: 'Clean Up Text', label: 'Clean Up Text' },
-  { value: 'Clarify & Restructure Text', label: 'Clarify & Restructure Text' },
-  { value: 'Friendly WhatsApp chat', label: 'Friendly WhatsApp Chat' },
-  { value: 'Semi-formal Work Chat (Google Chat/ClickUp)', label: 'Semi-formal Work Chat' },
+  { value: 'Simple Cleanup', label: 'Simple Cleanup' },
+  { value: 'Structured & Clear', label: 'Structured & Clear' },
+  { value: 'Casual Messaging & Friendly Chat', label: 'Casual Messaging & Friendly Chat' },
+  { value: 'Semi-Formal Work Chat (Professional)', label: 'Semi-Formal Work Chat (Professional)' },
   { value: 'Professional Email', label: 'Professional Email' },
-  { value: 'Concise Summary', label: 'Concise Summary' },
-  { value: 'Formal Report Snippet', label: 'Formal Report Snippet' },
+  { value: 'Marketing & Copywriting', label: 'Marketing & Copywriting' },
 ];
 
 export const DEFAULT_LANGUAGE = 'en-US';
-export const DEFAULT_FORMATTING_STYLE = 'Clean Up Text';
+export const DEFAULT_FORMATTING_STYLE = 'Simple Cleanup';
 

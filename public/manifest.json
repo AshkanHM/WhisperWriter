@@ -4,19 +4,19 @@
   "short_name": "Whisper Writer",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#111827",
-  "theme_color": "#111827",
+  "background_color": "#040a14",
+  "theme_color": "#040a14",
   "description": "AI-powered transcription and text formatting.",
   "icons": [
     {
       "src": "/icons/App Icon Light.webp",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/webp"
     },
     {
-      "src": "/icons/App Icon Light.webp",
+      "src": "/Images/ww_logo_v.webp",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/webp"
     }
   ]
 }

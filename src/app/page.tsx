@@ -6,13 +6,9 @@ import Head from 'next/head';
 import React, {useState, useRef, useEffect, useCallback} from 'react';
 import {Button} from '@/components/ui/button';
 import {Textarea} from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
+import StyleSelect from '@/components/StyleSelect';
+
 import {
   Dialog,
   DialogContent,
@@ -35,6 +31,7 @@ import {
   Check,
   Trash2,
   RefreshCw,
+  ClipboardPaste,
 } from 'lucide-react';
 import {
   LANGUAGES,
@@ -43,6 +40,30 @@ import {
   DEFAULT_FORMATTING_STYLE,
 } from '@/lib/whisper-writer-config';
 import {cn} from '@/lib/utils';
+
+// Minimal Lucide-style broom icon
+export function BroomIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="m13 11 9-9" />
+      <path d="M14.6 12.6c.8.8.9 2.1.2 3L10 22l-8-8 6.4-4.8c.9-.7 2.2-.6 3 .2Z" />
+      <path d="m6.8 10.4 6.8 6.8" />
+      <path d="m5 17 1.4-1.4" />
+    </svg>
+  );
+}
+
 
 
 type RecordingState = 'idle' | 'recording' | 'paused' | 'stopped';
@@ -64,6 +85,12 @@ const WhisperWriterPage: NextPage = () => {
   const [selectedStyle, setSelectedStyle] = useState<string>(DEFAULT_FORMATTING_STYLE);
   const [isLanguageModalOpen, setLanguageModalOpen] = useState(false);
   
+  const [mounted, setMounted] = useState(false);
+useEffect(() => { setMounted(true); }, []);
+
+const hasTranscription = transcription.trim().length > 0;
+const hasFormatted     = formattedText.trim().length   > 0;
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const isCancelledRef = useRef<boolean>(false);
@@ -71,9 +98,12 @@ const WhisperWriterPage: NextPage = () => {
   const transcriptionCursorPositionRef = useRef<{ start: number, end: number }>({ start: 0, end: 0 });
   const {toast} = useToast();
 
+  const aiTextareaRef = useRef<HTMLTextAreaElement>(null);
+  
+
   const resetState = useCallback(() => {
     if (mediaRecorderRef.current?.stream) {
-        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
     }
     mediaRecorderRef.current = null;
     audioChunksRef.current = [];
@@ -83,7 +113,18 @@ const WhisperWriterPage: NextPage = () => {
     setFormattedText('');
     setSelectedStyle(DEFAULT_FORMATTING_STYLE);
     setSelectedLanguage(DEFAULT_LANGUAGE);
+  
+    // Reset textarea sizes
+    if (transcriptionTextareaRef.current) {
+      transcriptionTextareaRef.current.style.height = '';
+      transcriptionTextareaRef.current.style.width = '';
+    }
+    if (aiTextareaRef.current) {
+      aiTextareaRef.current.style.height = '';
+      aiTextareaRef.current.style.width = '';
+    }
   }, []);
+  
 
   const handleCancelRecording = () => {
     if (mediaRecorderRef.current) {
@@ -151,9 +192,23 @@ const WhisperWriterPage: NextPage = () => {
               const newText = `${prev.substring(0, start)}${separator}${transcriptionResult.transcription}${prev.substring(end)}`;
               const newCursorPos = start + transcriptionResult.transcription.length + separator.length;
               setTimeout(() => {
-                transcriptionTextareaRef.current?.focus();
-                transcriptionTextareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
-                transcriptionCursorPositionRef.current = { start: newCursorPos, end: newCursorPos };
+// keep the new cursor position for later, but don't focus on mobile
+const isMobile =
+  typeof navigator !== 'undefined' &&
+  /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+// was: setTimeout(() => { el.focus(); el.setSelectionRange(...); }, 0);
+if (!isMobile) {
+  requestAnimationFrame(() => {
+    const el = transcriptionTextareaRef.current;
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    el.setSelectionRange(newCursorPos, newCursorPos);
+  });
+}
+
+transcriptionCursorPositionRef.current = { start: newCursorPos, end: newCursorPos };
+
               }, 0);
               return newText;
             });
@@ -223,6 +278,17 @@ const WhisperWriterPage: NextPage = () => {
       .catch(err => toast({title: 'Copy Failed', variant: 'destructive'}));
   };
   
+  const handlePasteFromClipboard = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setTranscription(current => current + (current ? ' ' : '') + text);
+      toast({ title: "Pasted from Clipboard!" });
+    } catch (err) {
+      toast({ title: "Paste Failed", variant: "destructive" });
+    }
+  };
+
+
   const handleLanguageSelect = (langValue: string) => {
     setSelectedLanguage(langValue);
     setLanguageModalOpen(false);
@@ -243,6 +309,8 @@ const WhisperWriterPage: NextPage = () => {
   const isRecording = recordingState === 'recording' || recordingState === 'paused';
   const showCancelAndStop = recordingState === 'recording' || recordingState === 'paused';
 
+  const formattingDisabled = isLoading || !transcription;
+
   const getHeaderState = () => {
     if (isRecording) return 'recording';
     if (processingStage === 'transcribing' || processingStage === 'formatting') return 'transcribing';
@@ -257,7 +325,10 @@ const WhisperWriterPage: NextPage = () => {
     const selectedLang = LANGUAGES.find(lang => lang.value === selectedLanguage);
     return selectedLang ? selectedLang.label : 'More Languages';
   };
-
+  const gliderPos =
+  selectedLanguage === 'fa-IR' ? 'left' :
+  selectedLanguage === 'en-US' ? 'right' :
+  'none';
   return (
     <>
       <Head>
@@ -288,51 +359,163 @@ const WhisperWriterPage: NextPage = () => {
                 <span>{getLanguageButtonLabel()}</span>
             </button>
            <div className="absolute top-4 right-4 z-10">
-            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[38px] w-auto" />
+            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[52px] w-auto" />
           </div>
-          {/* Recording Controls - Moved into Header */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 flex items-center justify-center space-x-4 z-20">
-              {showCancelAndStop && (
-                  <Button onClick={handleCancelRecording} size="icon" variant="destructive" className="w-16 h-16 rounded-full bg-red-900/80">
-                      <Trash2 className="h-8 w-8" />
-                  </Button>
-              )}
+{/* Recording Controls — Glassy Cluster (languages in idle; cancel/stop when active) */}
+<div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20 pointer-events-none">
+  {mounted && (
+    <div
+      id="rec-cluster"
+        className="relative"
+      style={
+        {
+          // sizing tokens
+          // @ts-ignore
+          "--size": "144px", // main button
+          "--side": "56px",  // side buttons
+          "--gap": "18px",   // space between main and sides
+        } as React.CSSProperties
+      }
+    >
+{/* LEFT SIDE */}
+{(recordingState === 'recording' || recordingState === 'paused') ? (
+  <button
+    onClick={handleCancelRecording}
+    aria-label="Cancel recording"
+    className="rec-side-btn rec-left pointer-events-auto"
+  >
+    <Trash2 className="w-1/2 h-1/2" />
+  </button>
+) : null}
 
-              {(recordingState === 'idle' || recordingState === 'stopped') && (
-                  <>
-                      <Button onClick={() => setSelectedLanguage('en-US')} variant={selectedLanguage === 'en-US' ? 'secondary' : 'ghost'} className="rounded-full h-12">EN</Button>
-                      <Button onClick={handleStartRecording} size="icon" className="w-36 h-36 rounded-full bg-rose-200/10 shadow-lg text-6xl">
-                          🎙️
-                      </Button>
-                      <Button onClick={() => setSelectedLanguage('fa-IR')} variant={selectedLanguage === 'fa-IR' ? 'secondary' : 'ghost'} className="rounded-full h-12">FA</Button>
-                  </>
-              )}
 
-              {isRecording && (
-                <Button onClick={recordingState === 'recording' ? handlePauseRecording : handleResumeRecording} size="icon" className="w-32 h-32 rounded-full bg-red-500/80 shadow-lg">
-                  {recordingState === 'recording' ? <Pause className="h-16 w-16" /> : <span className="text-6xl">🎙️</span>}
-                </Button>
-              )}
-              
-              {showCancelAndStop && (
-                <Button onClick={handleStopRecording} size="icon" variant="secondary" className="w-16 h-16 rounded-full bg-green-500/80">
-                    <StopCircle className="h-8 w-8" />
-                </Button>
-              )}
-          </div>
+
+      {/* MAIN BUTTON */}
+      <button
+        aria-pressed={recordingState === 'recording'}
+        aria-label={
+          (recordingState === 'idle' || recordingState === 'stopped') ? "Start recording"
+          : recordingState === 'recording' ? "Pause recording"
+          : "Resume recording"
+        }
+        onClick={() => {
+          if (recordingState === 'idle' || recordingState === 'stopped') return handleStartRecording();
+          if (recordingState === 'recording') return handlePauseRecording();
+          if (recordingState === 'paused') return handleResumeRecording();
+        }}
+        className={cn(
+            "rec-btn pointer-events-auto",
+            recordingState
+        )}
+      >
+        {/* Idle: mic icon */}
+        <div className="icon icon-mic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 1 1-8 0V5a4 4 0 0 1 4-4z"/>
+                <path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v5"/><path d="M8 23h8"/>
+            </svg>
+        </div>
+
+        {/* Recording: animated waveform */}
+        <div className="icon icon-wave" aria-hidden="true">
+            <div className="wave">
+                <div className="bar"></div><div className="bar"></div><div className="bar"></div><div className="bar"></div><div className="bar"></div>
+            </div>
+        </div>
+
+        {/* Paused: pause icon */}
+        <div className="icon icon-pause" aria-hidden="true">
+            <div className="pause-shape">
+                <div className="pause-bar"></div><div className="pause-bar"></div>
+            </div>
+        </div>
+      </button>
+
+{/* RIGHT SIDE */}
+{(recordingState === 'recording' || recordingState === 'paused') ? (
+  <button
+    onClick={handleStopRecording}
+    aria-label="Stop and submit"
+    className="rec-side-btn rec-right pointer-events-auto"
+  >
+    <span className="rec-stop-square" />
+  </button>
+) : null}
+
+
+
+{(recordingState !== 'recording' && recordingState !== 'paused') && (
+  <div className="lang-switch" role="radiogroup" aria-label="Language selector">
+    {/* Left: Persian */}
+    <button
+      className={`lang-option lang-left ${selectedLanguage === 'fa-IR' ? 'is-active' : ''}`}
+      role="radio"
+      aria-checked={selectedLanguage === 'fa-IR'}
+      onClick={() => setSelectedLanguage('fa-IR')}
+    >
+      Persian
+    </button>
+
+    {/* Right: English */}
+    <button
+      className={`lang-option lang-right ${selectedLanguage === 'en-US' ? 'is-active' : ''}`}
+      role="radio"
+      aria-checked={selectedLanguage === 'en-US'}
+      onClick={() => setSelectedLanguage('en-US')}
+    >
+      English
+    </button>
+
+    <div className="lang-track" aria-hidden="true">
+      <div className="lang-rail" />
+      <div className="lang-glider" data-pos={gliderPos} />
+    </div>
+  </div>
+)}
+
+
+    </div>
+  )}
+</div>
+
+
+
+
         </header>
 
         {/* Shader layer */}
-        <div className="absolute top-40 left-0 h-48 w-full flex-shrink-0 bg-gradient-to-b from-[var(--bg)] to-transparent z-10 pointer-events-none" />
+        <div className="absolute top-40 left-0 h-32 w-full flex-shrink-0 bg-gradient-to-b from-[var(--bg)] to-transparent z-10 pointer-events-none" />
 
         {/* Main Content */}
-        <main className="relative flex-1 flex flex-col items-center p-4 space-y-4 overflow-y-auto pt-60 main-bg z-0">
-          
+        <main
+  className={cn(
+    "relative flex-1 flex flex-col items-center p-4 space-y-4",
+    "overflow-y-auto pt-60 main-bg z-0 main-scroll",
+    "pb-[calc(env(safe-area-inset-bottom)+80px)] sm:pb-40"
+  )}
+>
+ 
           {/* Text Areas & Controls */}
-          <div className="w-full max-w-lg space-y-6 flex flex-col items-center z-0">
+          <div className="w-full max-w-lg space-y-6 flex flex-col items-center z-0 mt-4">
             
-            <div className="glossy-card">
-              <div className="glossy-badge"><span className="dot"></span> Transcription (Editable)</div>
+          <div className="glossy-card">
+              <div className="flex items-center justify-between mb-2">
+                <div className="glossy-badge">
+                  <span className={cn("dot", hasTranscription && "dot-on")} />
+                  {" "}Transcription (Editable)
+                </div>
+                <button
+                  type="button"
+                  className="btn-card-ghost btn-sm -mt-3"
+                  onClick={handlePasteFromClipboard}
+                  disabled={isLoading || isRecording}
+                  aria-label="Paste from clipboard"
+                  title="Paste"
+                >
+                  <ClipboardPaste className="h-4 w-4" />
+                  <span>Paste</span>
+                </button>
+              </div>
               <textarea
                 id="transcription-text"
                 ref={transcriptionTextareaRef}
@@ -349,53 +532,76 @@ const WhisperWriterPage: NextPage = () => {
               />
             </div>
             
-            <div className="w-full max-w-lg flex flex-col space-y-2">
-                <Select value={selectedStyle} onValueChange={setSelectedStyle} disabled={isLoading || !transcription}>
-                    <SelectTrigger className="w-full h-12 text-sm rounded-lg bg-black/20 border-white/20">
-                        <SelectValue placeholder="Select style" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {FORMATTING_STYLES.map((style) => (
-                        <SelectItem key={style.value} value={style.value} className="text-sm">
-                            {style.label}
-                        </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                 <button onClick={handleFormatText} className="btn-glossy btn-glossy-ghost" disabled={isLoading || !transcription}>
-                    {processingStage === 'formatting' ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Wand2 className="mr-2 h-5 w-5" />}
-                    Format
-                </button>
-            </div>
-            
-            <div className="glossy-card">
-                <div className="glossy-badge">
-                  <span className={cn(
-                      "dot",
-                      (processingStage === 'success' && formattedText) && "bg-green-500 shadow-[0_0_14px_#22c55e]"
-                    )}>
-                  </span> AI-Enhanced Text
-                </div>
-                <div className="relative">
-                    <textarea
-                        id="formatted-text"
-                        value={formattedText}
-                        onChange={(e) => setFormattedText(e.target.value)}
-                        placeholder="Your formatted text will appear here..."
-                        className="glossy-textbox pr-12"
-                        disabled={isLoading}
-                    />
-                    <Button onClick={() => handleCopyToClipboard(formattedText)} size="icon" variant="ghost" className="absolute top-2 right-2 h-8 w-8" disabled={!formattedText}>
-                        <Copy className="h-4 w-4" />
-                    </Button>
-                </div>
-            </div>
-            <div className="w-full max-w-lg">
-              <button onClick={resetState} className="btn-glossy w-full" disabled={isLoading}>
-                    <RefreshCw className="mr-2 h-5 w-5" />
-                    Reset
-              </button>
-            </div>
+            <div className="w-full max-w-lg flex flex-col space-y-3">
+  {/* Formatting selector card – fancy dropdown */}
+  <div className="glossy-card overflow-hidden">
+    <StyleSelect
+      label="Formatting Style"
+      options={FORMATTING_STYLES.map(s => ({ label: s.label, value: s.value }))}
+      value={selectedStyle}
+      onChange={(v) => setSelectedStyle(v)}
+      disabled={isLoading || !transcription}
+    />
+  </div>
+
+  {/* Keep your existing action button below */}
+  <button
+    onClick={handleFormatText}
+    className="btn-glossy btn-glossy-ghost"
+    disabled={isLoading || !transcription}
+  >
+    {processingStage === 'formatting'
+      ? <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+      : <Wand2 className="mr-2 h-5 w-5" />
+    }
+    Re-Write & Enhance
+  </button>
+</div>
+
+
+{/* === AI-Enhanced Text Card (Copy button moved to header) === */}
+<div className="glossy-card">
+  <div className="flex items-center justify-between mb-2">
+    <div className="glossy-badge">
+      <span className={cn("dot", hasFormatted && "dot-on")} />
+      {" "}AI-Enhanced Text
+    </div>
+
+
+    {/* New visible Copy button (outside the textarea) */}
+    <button
+      type="button"
+      className="btn-card-ghost btn-sm -mt-3"
+      onClick={() => handleCopyToClipboard(formattedText)}
+      disabled={!formattedText}
+      aria-label="Copy formatted text"
+      title="Copy"
+    >
+      <Copy className="h-4 w-4" />
+      <span>Copy</span>
+    </button>
+  </div>
+
+  {/* Textarea no longer needs right padding or absolute icon */}
+  <textarea
+    ref={aiTextareaRef}
+    id="formatted-text"
+    value={formattedText}
+    onChange={(e) => setFormattedText(e.target.value)}
+    placeholder="Your formatted text will appear here..."
+    className="glossy-textbox"
+    disabled={isLoading}
+  />
+</div>
+
+
+
+<div className="w-full max-w-lg !mt-4 mb-10">
+  <button onClick={resetState} className="btn-clear-glassy" disabled={isLoading}>
+  <BroomIcon className="mr-2 h-5 w-5 -rotate-12" />
+  Clear
+  </button>
+</div>
           </div>
         </main>
       </div>
@@ -425,6 +631,153 @@ const WhisperWriterPage: NextPage = () => {
           </ScrollArea>
         </DialogContent>
       </Dialog>
+      <style jsx global>{`
+  /* Layout: fixed 3-column grid so side buttons never slide */
+  #rec-cluster{
+    display: grid;
+    align-items: center;                  /* vertical centering */
+    grid-template-columns: var(--side) var(--size) var(--side);
+    column-gap: var(--gap);
+  }
+
+/* Demo-specific tokens */
+:root {
+  --size: 108px;
+  --border: rgba(255,255,255,.14);
+  --shadow: rgba(0,0,0,.35);
+  --glass-top: rgba(255,255,255,.08);
+  --glass-bot: rgba(255,255,255,.03);
+  --accent: #7C5CFF;
+  --accent-rec: #FF3B3B;
+  --accent-pause: #22D3EE;
+  --text: #fff;
+  --bg: #0B0B12;
+}
+
+/* Core circular button */
+.rec-btn {
+  --ring: var(--accent);
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--glass-top), var(--glass-bot));
+  box-shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 24px 64px var(--shadow), 0 0 0 0 rgba(124,92,255,0);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: transform .18s ease, box-shadow .28s ease, background .28s ease, border-color .28s ease;
+}
+.rec-btn:hover { transform: translateY(-1px); }
+.rec-btn:active { transform: translateY(0) scale(.98); }
+
+/* Idle glow */
+.rec-btn.idle { --ring: var(--accent); }
+.rec-btn.idle {
+  box-shadow: 0 1px 0 rgba(255,255,255,.05) inset, 0 24px 64px var(--shadow), 0 0 32px 0 rgba(124,92,255,.20);
+}
+.rec-btn.idle .icon-mic { opacity: 1; }
+
+/* Recording state */
+.rec-btn.recording {
+  --ring: var(--accent-rec);
+  transform: scale(1.08);
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+  border-color: rgba(255,255,255,.22);
+  box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 28px 80px rgba(255,59,59,.35), 0 0 42px 0 rgba(255,59,59,.30);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.rec-btn.recording .icon-wave { opacity: 1; }
+
+
+/* Paused state */
+.rec-btn.paused {
+  --ring: var(--accent-pause);
+  background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
+  border-color: rgba(255,255,255,.18);
+  box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 24px 70px rgba(34,211,238,.30), 0 0 36px 0 rgba(34,211,238,.26);
+}
+.rec-btn.paused .icon-pause { opacity: 1; }
+
+
+/* Icons & waveform */
+.icon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transition: opacity .18s ease;
+  opacity: 0;
+}
+.icon svg { width: 40%; height: 40%; }
+
+
+/* Simple animated waveform bars */
+.wave {
+  width: 58%; height: 38%; display: flex; align-items: flex-end; justify-content: center; gap: 6%;
+}
+.bar {
+  width: 10%; background: linear-gradient(180deg, var(--ring), rgba(255,255,255,.1));
+  border-radius: 6px;
+  animation: bounce 1s ease-in-out infinite;
+}
+.bar:nth-child(2) { animation-delay: .1s; }
+.bar:nth-child(3) { animation-delay: .2s; }
+.bar:nth-child(4) { animation-delay: .3s; }
+.bar:nth-child(5) { animation-delay: .4s; }
+
+
+/* Pause icon styling */
+.pause-shape { width: 34%; height: 46%; display: flex; gap: 18%; align-items: center; justify-content: center; }
+.pause-bar { flex: 0 0 28%; height: 100%; border-radius: 6px; background: linear-gradient(180deg, var(--ring), rgba(255,255,255,.1)); }
+
+
+  /* Glass tokens */
+  :root{
+    --rec-glass: rgba(255,255,255,.045);  /* more transparent */
+    --rec-blur: 4px;                      /* lower blur = less frosty */
+    --rec-sat: 120%;                      /* subtle saturation */
+    --rec-border: rgba(255,255,255,.16);
+    --rec-shadow: rgba(0,0,0,.35);
+    --rec-tint-red: rgba(255,59,59,.35);
+    --rec-tint-blue: rgba(77,163,255,.35);
+  }
+
+
+  /* Side buttons (language in idle; cancel/stop when active) */
+  .rec-side-btn{
+    width: var(--side); height: var(--side);
+    border-radius: 9999px;
+    border: 1px solid var(--rec-border);
+    background: var(--rec-glass);        /* flat glass */
+    color:#fff;
+    display:grid; place-items:center;
+    box-shadow: 0 16px 36px var(--rec-shadow);
+    backdrop-filter: blur(var(--rec-blur)) saturate(var(--rec-sat));
+    -webkit-backdrop-filter: blur(var(--rec-blur)) saturate(var(--rec-sat));
+    transition: transform .18s ease, box-shadow .28s ease, background .28s ease, border-color .28s ease;
+  }
+  .rec-side-btn:hover{ transform: translateY(-1px) }
+
+  /* Language active highlight */
+  .lang-active{
+    border-color: rgba(124,92,255,.45);
+    box-shadow: 0 0 0 0.4px rgba(124,92,255,.45), 0 8px 22px rgba(124,92,255,.25);
+  }
+
+  /* Stop icon block inside right button */
+  .rec-stop-square{
+    width:42%; height:42%;
+    border-radius:8px;
+    background: rgba(255,59,59,.85);
+    display:block;
+  }
+`}</style>
+
     </>
   );
 };

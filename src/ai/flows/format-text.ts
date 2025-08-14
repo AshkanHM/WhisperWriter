@@ -46,36 +46,40 @@ Instruction: The output text MUST be in the same language as the input. Do not t
 
 Please apply the specific guidelines for the 'Requested Style':
 
-If 'Requested Style' is 'Clean Up Text':
+If 'Requested Style' is 'Simple Cleanup':
 - Focus on correcting grammar, spelling, and punctuation.
 - Ensure proper text formatting and sentence structure according to the conventions of the 'Original Language'.
-- Do not significantly alter the tone or core message of the original text. The goal is a polished, grammatically correct, and well-formatted version of the input.
+- Do not significantly alter the tone or core message of the original text. The goal is a polished, grammatically correct, and well-formatted version of the input without changing its original tone.
 
-If 'Requested Style' is 'Clarify & Restructure Text':
+If 'Requested Style' is 'Structured & Clear':
 - Go beyond basic cleanup. Rephrase and restructure the text to make it exceptionally clear, well-instructed, and easy to understand.
 - Improve sentence flow and coherence. Break down complex sentences if necessary.
 - Organize information logically. If the input text contains implicit or explicit lists, rewrite them using bullet points or numbered lists as appropriate to enhance readability and understanding.
-- If the input text has distinct conceptual parts, ensure the output clearly divides or segments these parts for improved readability and comprehension. This could involve using paragraph breaks, or other structural cues.
-- Ensure the core meaning is preserved but presented in a more effective and digestible manner. The goal is to transform the text into a highly comprehensible and well-organized piece.
+- If the input text has distinct conceptual parts, clearly divide or segment these parts for improved readability and comprehension (e.g., using paragraph breaks or other structural cues).
+- Ensure the core meaning and tone are preserved but presented in a more effective and digestible manner.
 
-If 'Requested Style' is 'Friendly WhatsApp chat':
-- Make the output very casual, natural, and friendly, as if talking to a close friend.
-- Ensure the tone is conversational, engaging, and light-hearted.
+If 'Requested Style' is 'Casual Messaging & Friendly Chat':
+- Rewrite in a friendly, relaxed, casual, and conversational tone as if chatting with a friend.
+- Ensure the tone is engaging and approachable.
 - STRICTLY DO NOT INCLUDE ANY EMOJIS.
 
-If 'Requested Style' is 'Semi-formal Work Chat (Google Chat/ClickUp)':
-- Make the output appropriate for professional communication with colleagues and managers, suitable for platforms like Google Chat or ClickUp.
-- The text should be clear, concise, well-instructed, and professionally formatted (e.g., using bullet points or numbered lists if appropriate for clarity).
+If 'Requested Style' is 'Semi-Formal Work Chat (Professional)':
+- Make the output appropriate for professional communication with colleagues and managers, suitable for workplace messaging platforms.
+- The text should be clear, concise, and professionally formatted (e.g., using bullet points or numbered lists if appropriate for clarity).
 - Maintain a respectful yet approachable tone. Ensure it sounds professional and polished.
 
 If 'Requested Style' is 'Professional Email':
-- Format the text as a professional email. Maintain a formal and courteous tone. Ensure appropriate email structure if applicable (e.g., salutation, body, closing), but primarily focus on rephrasing the given text into this style.
+- Format the text as a professional email. Maintain a formal and courteous tone. Ensure appropriate email structure if applicable (e.g., salutation, body, closing).
+- Rewrite the message into a formal, respectful, and business-ready email.
+- Keep the tone professional and courteous.
 
-If 'Requested Style' is 'Concise Summary':
-- Rewrite the text as a brief and concise summary, capturing the main points effectively.
-
-If 'Requested Style' is 'Formal Report Snippet':
-- Adapt the text into a snippet suitable for a formal report. Use objective language and a structured, professional tone.
+If 'Requested Style' is 'Marketing & Copywriting':
+- Rewrite the text as if crafted by a professional, high-converting copywriter.
+- Focus on engaging the reader while keeping the tone persuasive and audience-focused.
+- Use clear, benefit-driven language that motivates the reader to take action.
+- Adapt the style to feel natural for marketing content (e.g., sales page, ad copy, promotional message).
+- Ensure the output is concise, impactful, and aligns with best practices for effective copywriting.
+- Do not add emojis unless the original text contains them.
 
 For any other 'Requested Style' not explicitly detailed above, please interpret '{{{style}}}' broadly and rewrite the text to fit its typical conventions, always maintaining the 'Original Language'.
 
