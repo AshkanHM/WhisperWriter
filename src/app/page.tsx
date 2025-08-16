@@ -373,7 +373,7 @@ const hasFormatted     = formattedText.trim().length   > 0;
                 <span>{getLanguageButtonLabel()}</span>
             </button>
            <div className="absolute top-4 right-4 z-10">
-            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[52px] w-auto" />
+            <img src="/Images/ww_logo.webp" alt="Whisper Writer Logo" className="h-[39px] w-auto" />
           </div>
 {/* Recording Controls — Glassy Cluster (languages in idle; cancel/stop when active) */}
 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20 pointer-events-none">
