@@ -148,33 +148,47 @@ const hasFormatted     = formattedText.trim().length   > 0;
   const handleStartRecording = async () => {
     if (recordingState === 'recording') return;
     setProcessingStage('idle');
-    isCancelledRef.current = false; 
+    isCancelledRef.current = false;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-      mediaRecorderRef.current = new MediaRecorder(stream);
+  
+      // Explicitly check for supported MIME types
+      const mimeTypes = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm'];
+      const supportedMimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type));
+  
+      if (!supportedMimeType) {
+        toast({
+          title: 'Recording Error',
+          description: 'No supported audio format found in this browser.',
+          variant: 'destructive',
+        });
+        return;
+      }
+  
+      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: supportedMimeType });
       audioChunksRef.current = [];
-
+  
       mediaRecorderRef.current.ondataavailable = (event) => {
         audioChunksRef.current.push(event.data);
       };
-
+  
       mediaRecorderRef.current.onstop = async () => {
         stream.getTracks().forEach(track => track.stop());
         if (isCancelledRef.current) {
-            console.log("Recording cancelled, transcription skipped.");
-            isCancelledRef.current = false; // Reset for next recording
-            return;
+          console.log("Recording cancelled, transcription skipped.");
+          isCancelledRef.current = false; // Reset for next recording
+          return;
         }
-        
-        const audioBlob = new Blob(audioChunksRef.current, {type: mediaRecorderRef.current?.mimeType || 'audio/webm'});
+  
+        const audioBlob = new Blob(audioChunksRef.current, {type: supportedMimeType});
         if (audioBlob.size === 0) {
-            console.log("No audio data recorded.");
-            setRecordingState('idle'); 
-            return;
+          console.log("No audio data recorded.");
+          setRecordingState('idle');
+          return;
         }
-
+  
         setRecordingState('idle');
-
+  
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
         reader.onloadend = async () => {
@@ -185,30 +199,29 @@ const hasFormatted     = formattedText.trim().length   > 0;
               audioDataUri: base64Audio,
               language: selectedLanguage,
             });
-             setTranscription(prev => {
+            setTranscription(prev => {
               const { start, end } = transcriptionCursorPositionRef.current;
               // Add a space if inserting between existing text and not at the beginning
               const separator = prev.length > 0 && start > 0 && prev[start - 1] !== ' ' ? ' ' : '';
               const newText = `${prev.substring(0, start)}${separator}${transcriptionResult.transcription}${prev.substring(end)}`;
               const newCursorPos = start + transcriptionResult.transcription.length + separator.length;
               setTimeout(() => {
-// keep the new cursor position for later, but don't focus on mobile
-const isMobile =
-  typeof navigator !== 'undefined' &&
-  /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-
-// was: setTimeout(() => { el.focus(); el.setSelectionRange(...); }, 0);
-if (!isMobile) {
-  requestAnimationFrame(() => {
-    const el = transcriptionTextareaRef.current;
-    if (!el) return;
-    el.focus({ preventScroll: true });
-    el.setSelectionRange(newCursorPos, newCursorPos);
-  });
-}
-
-transcriptionCursorPositionRef.current = { start: newCursorPos, end: newCursorPos };
-
+                // keep the new cursor position for later, but don't focus on mobile
+                const isMobile =
+                  typeof navigator !== 'undefined' &&
+                  /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  
+                // was: setTimeout(() => { el.focus(); el.setSelectionRange(...); }, 0);
+                if (!isMobile) {
+                  requestAnimationFrame(() => {
+                    const el = transcriptionTextareaRef.current;
+                    if (!el) return;
+                    el.focus({ preventScroll: true });
+                    el.setSelectionRange(newCursorPos, newCursorPos);
+                  });
+                }
+  
+                transcriptionCursorPositionRef.current = { start: newCursorPos, end: newCursorPos };
               }, 0);
               return newText;
             });
@@ -220,7 +233,7 @@ transcriptionCursorPositionRef.current = { start: newCursorPos, end: newCursorPo
           }
         };
       };
-
+  
       mediaRecorderRef.current.start();
       setRecordingState('recording');
     } catch (error) {
@@ -637,5 +650,3 @@ transcriptionCursorPositionRef.current = { start: newCursorPos, end: newCursorPo
 };
 
 export default WhisperWriterPage;
-
-    
